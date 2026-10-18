@@ -1,0 +1,79 @@
+/* Web-owned presentation. Upstream CSS and business modules remain immutable.
+   Disclosures are constructed by their renderers, never hidden by a DOM patch. */
+.lubi-plan-intro { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px; }
+.lubi-plan-intro .lubi-plan-heading { margin:0 0 4px; font-size:25px; letter-spacing:-.6px; }
+.lubi-plan-intro .lubi-muted { font-size:12px; line-height:1.65; }
+.lubi-context-tools { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.lubi-overview-compact { display:flex; flex-wrap:wrap; align-items:center; gap:0; margin:0 0 22px; padding:12px 0; border-top:1px solid var(--background-modifier-border); border-bottom:1px solid var(--background-modifier-border); }
+.lubi-overview-compact .lubi-plan-metric { display:flex; flex-direction:row; align-items:baseline; gap:9px; padding:3px 22px; min-height:0; min-width:0; flex:0 1 auto; border:0; border-right:1px solid var(--background-modifier-border); border-radius:0; background:transparent; box-shadow:none; }
+.lubi-overview-compact .lubi-plan-metric:first-child { padding-left:0; }
+.lubi-overview-compact .lubi-plan-metric[data-plan-metric="actual"] { border-right:0; }
+.lubi-overview-compact .lubi-plan-metric-label { margin:0; font-size:12px; color:var(--text-muted); }
+.lubi-overview-compact .lubi-plan-metric-value { margin:0; font-size:21px; line-height:1.2; font-weight:650; letter-spacing:-.5px; }
+.lubi-overview-notice { flex-basis:100%; margin-top:10px; font-size:12px; color:var(--text-muted); }
+.lubi-personal-time > summary { cursor:pointer; list-style:revert; padding:14px 16px; margin:0; }
+.lubi-personal-time > summary .lubi-panel-title { font-size:13px; }
+.lubi-personal-time:not([open]) { padding-bottom:0; }
+.lubi-personal-time[open] { padding-bottom:12px; }
+.lubi-personal-time > .lubi-execution-note { padding:0; margin:0 0 8px; font-size:11px; }
+.lubi-personal-time > .lubi-personal-time-add { margin:8px 0 0; }
+.lubi-read-warning { border:1px solid var(--background-modifier-border); border-left:3px solid var(--text-warning, #b78020); background:var(--background-secondary); padding:16px 18px; margin:12px 0 20px; border-radius:8px; line-height:1.7; overflow-wrap:anywhere; }
+.lubi-read-warning strong { display:block; font-size:15px; }
+.lubi-read-warning button { margin-top:10px; }
+.lubi-load-state { position:sticky; top:0; z-index:20; padding:9px 14px; background:var(--background-secondary); border:1px solid var(--background-modifier-border); border-radius:6px; font-size:12px; color:var(--text-muted); }
+.lubi-progressive-task { width:min(560px,calc(100vw - 32px)); }
+.lubi-progressive-task .modal-content { padding-top:4px; }
+.lubi-progressive-task .lubi-plan-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:18px 0 20px; }
+.lubi-progressive-task .lubi-plan-grid > .lubi-field { margin:0; }
+.lubi-progressive-task .lubi-field > input, .lubi-progressive-task .lubi-field > select { width:100%; }
+.lubi-form-note { font-size:12px; line-height:1.7; color:var(--text-muted); margin:0 0 16px; }
+.lubi-new-task-more, .lubi-new-task-actual { margin:0; border-top:1px solid var(--background-modifier-border); }
+.lubi-new-task-more > summary, .lubi-new-task-actual > summary { padding:14px 2px; cursor:pointer; font-size:12px; color:var(--text-normal); line-height:1.7; overflow-wrap:anywhere; }
+.lubi-new-task-more-body, .lubi-new-task-actual-body { padding:4px 0 14px; }
+.lubi-new-task-more-body > .lubi-field { margin-bottom:14px; }
+.lubi-new-task-more-body .lubi-repeat-field { margin-top:12px; }
+.lubi-progressive-task .lubi-modal-actions { margin-top:20px; padding-top:16px; }
+.lubi-progressive-task .lubi-extras-toggles { flex-wrap:wrap; }
+.lubi-new-task-actual .lubi-actual-details { margin-top:12px; }
+.lubi-new-task-actual .lubi-completion-choice { margin-top:14px; }
+.web-settings-modal { width:min(780px,calc(100vw - 32px)); }
+.web-settings-nav { display:flex; gap:6px; padding-bottom:14px; margin-bottom:14px; border-bottom:1px solid var(--background-modifier-border); }
+.web-settings-nav button { padding:8px 14px; border-radius:6px; background:transparent; border:1px solid transparent; box-shadow:none; }
+.web-settings-nav button[aria-selected=true] { background:var(--background-secondary); border-color:var(--background-modifier-border); font-weight:600; }
+.web-settings-backups { padding-bottom:12px; }
+.web-backup-card { border:1px solid var(--background-modifier-border); border-radius:10px; padding:16px 18px; margin:14px 0; }
+.web-backup-heading { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+.web-backup-heading h3 { margin:0; font-size:15px; }
+.web-backup-format { padding:3px 7px; background:var(--background-secondary); border-radius:4px; font-size:10px; color:var(--text-muted); }
+.web-backup-card p { font-size:12px; line-height:1.7; margin:9px 0; overflow-wrap:anywhere; }
+.web-backup-card .web-backup-caution { color:var(--text-muted); }
+.web-backup-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.web-backup-actions button { font-size:12px; white-space:normal; height:auto; min-height:32px; }
+.web-backup-status:empty { margin:0; }
+.web-backup-commands > summary { cursor:pointer; font-size:12px; padding-top:6px; }
+.web-backup-commands pre { white-space:pre-wrap; overflow-wrap:anywhere; font-size:11px; line-height:1.8; padding:12px; background:var(--background-secondary); border-radius:6px; }
+.product-context { margin-top:0!important; }
+@media(max-width:700px) {
+ .lubi-plan-intro { align-items:flex-start; gap:10px; }
+ .lubi-plan-intro .lubi-plan-heading { font-size:21px; }
+ .lubi-context-tools { gap:5px; }
+ .lubi-context-tools .lubi-btn { padding:6px 9px; font-size:11px; }
+ .lubi-context-tools .lubi-icon { display:none; }
+ .lubi-overview-compact { row-gap:10px; padding:12px 0; margin-bottom:16px; }
+ .lubi-overview-compact .lubi-plan-metric { flex-basis:50%; padding:2px 12px; gap:8px; box-sizing:border-box; }
+ .lubi-overview-compact .lubi-plan-metric:nth-child(odd) { padding-left:0; }
+ .lubi-overview-compact .lubi-plan-metric:nth-child(even) { border-right:0; }
+ .lubi-overview-compact .lubi-plan-metric-value { font-size:19px; }
+ .lubi-topbar-right .lubi-topbar-record { padding:5px 10px; }
+ .lubi-topbar-right .lubi-topbar-record .lubi-icon { width:14px; height:14px; }
+ .web-backup-card { padding:14px; }
+}
+@media(prefers-reduced-motion:reduce) { .lubi-load-state { animation:none; } }
+
+.lubi-root .lubi-background-card > summary { font-size:13px; min-height:20px; }
+.lubi-disclosure-chevron { margin-left:auto; color:var(--text-muted); font-size:18px; line-height:1; }
+.lubi-personal-time[open] .lubi-disclosure-chevron { transform:rotate(90deg); }
+
+/* Honor renderer-owned collapsed state. Upstream flex layouts override the UA hidden rule. */
+.lubi-task-modal .lubi-extra-field[hidden],
+.lubi-task-modal .lubi-project-create[hidden] { display:none !important; }

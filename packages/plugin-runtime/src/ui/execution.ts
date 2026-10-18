@@ -73,7 +73,7 @@ function entryBody(plugin: LubiPlugin, host: HTMLElement, entry: BackgroundEntry
   const meta = row.createDiv({ cls: "lubi-execution-meta" });
   const project = plugin.tasks.projectOf(entry.task);
   if (project) meta.createSpan({ text: project.title });
-  if (entry.task.repeat.kind !== "none") meta.createSpan({ text: `发生日 ${entry.date}` });
+  meta.createSpan({ text: `发生日 ${entry.date}` });
   runtimeLabel(meta, entry.run);
   return row;
 }
@@ -81,14 +81,14 @@ function entryBody(plugin: LubiPlugin, host: HTMLElement, entry: BackgroundEntry
 /** Global queues are intentionally independent of the selected planning date. */
 export function renderExecutionQueues(plugin: LubiPlugin, host: HTMLElement, rerender: () => void, actions: ExecutionActions, attentionHost: HTMLElement = host): void {
   const review = backgroundEntries(plugin.tasks.all, "review"), running = backgroundEntries(plugin.tasks.all, "running");
-  {
+  if (review.length) {
+    // Important global review items never depend on the selected date or a disclosure.
     const card = attentionHost.createDiv({ cls: "lubi-section lubi-list-card lubi-attention-card" });
     if (!attentionHost.classList.contains("lubi-card")) card.addClass("lubi-card");
     const head = card.createDiv({ cls: "lubi-panel-head" });
     head.createEl("h3", { cls: "lubi-panel-title", text: "需我处理" });
     head.createSpan({ cls: "lubi-muted", text: `${review.length} 待审核` });
     card.createDiv({ cls: "lubi-muted lubi-execution-note", text: "跨日期汇总；验收不自动记时，记用时默认不验收。" });
-    if (!review.length) card.createDiv({ cls: "lubi-muted lubi-attention-empty", text: "没有待审核的结果。" });
     const list = card.createDiv({ cls: "lubi-execution-list" });
     for (const entry of review) {
       const row = entryBody(plugin, list, entry, actions), controls = row.createDiv({ cls: "lubi-execution-actions" });
@@ -120,8 +120,8 @@ export function renderExecutionQueues(plugin: LubiPlugin, host: HTMLElement, rer
   {
     const card = host.createEl("details", { cls: "lubi-section lubi-list-card lubi-background-card" });
     if (!host.classList.contains("lubi-card")) card.addClass("lubi-card");
-    card.open = true;
-    card.createEl("summary", { text: `Agent 后台 · ${running.length}`, attr: { "aria-label": `后台运行 ${running.length} 项；仅手动标注，不计入本人实际用时` } });
+    card.open = running.length > 0;
+    card.createEl("summary", { text: running.length ? `Agent 后台 · ${running.length}` : "Agent 后台 · 暂无运行", attr: { "aria-label": `后台运行 ${running.length} 项；仅手动标注，不计入本人实际用时` } });
     card.createDiv({ cls: "lubi-muted lubi-execution-note", text: "仅手动标注，不控制 Agent，不计入本人实际用时。" });
     const list = card.createDiv({ cls: "lubi-execution-list" });
     if (!running.length) list.createDiv({ cls: "lubi-muted lubi-pad", text: "当前没有标注为运行中的后台任务。" });

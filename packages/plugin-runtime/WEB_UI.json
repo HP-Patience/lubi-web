@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "owner": "Lubi Web presentation",
+  "approval": "2026-10-18: allow_web_ui_changes; review before deployment",
+  "baselineCommit": "a6c02ea644457cb400153bf208a363fbde4e36c6",
+  "immutableUpstreamManifestSha256": "8a30802946e4e9824064b715c4d1ac0044d24199c0afb3a683a5102f81c4b00f",
+  "contract": "Original reference is read-only. Core, services, formats, CAS and security are not forked. Web layout intentionally differs; do not use native pixel parity as current acceptance.",
+  "overrides": {
+    "src/ui/tasks.ts": {
+      "originalSha256": "c20dec3bd4eb038f55b594f2aad9f44046c4479b77c1128e6c7564ae636ca960",
+      "webSha256": "05bff6eea3b0076b30ed9418b45620b74331bf03c7d879d7c6b92425e656a57b",
+      "reason": "Compact summary, successfully-empty disclosures, purpose-based timer/backlog entries, explicit unknown journal state."
+    },
+    "src/ui/execution.ts": {
+      "originalSha256": "69ad95972329ee82782e864cd58f5d7c1181aaea968cd2302e1048b7b9cb16d1",
+      "webSha256": "4c702b1417497dcffb23a85dd772f2c34c89bfaf5b99789f5f90cbe5b2ac0078",
+      "reason": "Remove empty review card, collapse empty background queue; retain global review and occurrence dates."
+    },
+    "src/ui/review.ts": {
+      "originalSha256": "9299f83a1b4d0acf5f61344ee1736ada637ba4a96e20fde47fd929b35c28a4db",
+      "webSha256": "80a600d82d595f6eab36a9d01f278c6468c6612b18b6ade37aad9968c98a4e6d",
+      "reason": "Place cost/outcome and weekly review beside review content; calculations unchanged."
+    },
+    "src/ui/view.ts": {
+      "originalSha256": "63cca178e476995ba221a7347c138a409c35ba41dcff2be48a8fd2b8fcb6175e",
+      "webSha256": "4b07d0d1d1529908acccc895b4e94cfae8ea1a55935e86b460c37dee893c0a7b",
+      "reason": "Explicit actual-entry button, more-menu discovery, backup destination, loading/read-error visibility."
+    },
+    "src/ui/productivity.ts": {
+      "originalSha256": "d02b7d0f027b1be6e4fe5c72a22135a90c90a51bca4bf83939d122b45c58693e",
+      "webSha256": "64279b203ff0e2c7803c922dd8deab90f45e68ebb892994e6e426dea90b94b4a",
+      "reason": "Purpose-specific dialogs instead of unrelated tabs; format-specific restore explanation; operations unchanged."
+    },
+    "src/ui/modals/task.ts": {
+      "originalSha256": "0b49b3483895ee0eab309a9fe6395cf6d586432d74d631029904d543aa0512bb",
+      "webSha256": "e919ea43140c6e9bcb338785a37669bfcc10ca5d5a5a905ae83bb458cb82e61d",
+      "reason": "Progressive creation, draft-preserving collapse, explicit-only quick actual parsing; unchanged persistence engine."
+    },
+    "src/ui/modals/fields.ts": {
+      "originalSha256": "8e77daf1fedfc22217aec75a910d2658d7f6171aec0d693d0a59fa938b86e9f3",
+      "webSha256": "ed4fda7897d5575b1470c0704e1c61054703bf2ccfc5d9abb5cc5220c152a4ca",
+      "reason": "Reveal all ancestors of invalid collapsed fields before focus."
+    }
+  },
+  "additions": {
+    "src/ui/planningForm.ts": {
+      "webSha256": "5f11cc9c7bc1ca890a798ebfed270cec5781cab467f4851f74943bc52f56f505",
+      "reason": "Creation layout assembled inside TaskModal; no global DOM masking and no persistence."
+    }
+  },
+  "firstPartyPresentation": [
+    "apps/web/src/host/app.ts",
+    "apps/web/src/host/settings.ts",
+    "apps/web/src/host/backups.ts",
+    "apps/web/src/plugin.css",
+    "apps/web/src/ui-refinement.css"
+  ],
+  "acceptance": "docs/Web界面审核.md"
+}

@@ -27,8 +27,12 @@ export function fieldError(control: HTMLInputElement | HTMLSelectElement | undef
   host?.createDiv({ cls: "lubi-field-error", text: message, attr: { id, role: "alert" } });
   control.setAttribute("aria-invalid", "true");
   control.setAttribute("aria-describedby", id);
-  const disclosure = control.closest("details");
-  if (disclosure) disclosure.open = true;
+  let ancestor: HTMLElement | null = control.parentElement;
+  while (ancestor) {
+    if (ancestor.tagName === "DETAILS") (ancestor as HTMLDetailsElement).open = true;
+    if (ancestor.classList.contains("lubi-extra-field")) ancestor.hidden = false;
+    ancestor = ancestor.parentElement;
+  }
   control.focus();
 }
 export function clearFieldError(control: HTMLElement): void {

@@ -7,7 +7,7 @@ import { iconButton, segmented, button, debounce, hideTip, tip } from "./compone
 import { renderReview, ReviewState } from "./review";
 import { ganttWindow } from "../core/gantt";
 import { renderTasks, TasksState } from "./tasks";
-import { ShortcutsModal, TaskModal } from "./modals";
+import { ShortcutsModal, TaskModal, openUnifiedRecord } from "./modals";
 import { AiTaskModal } from "./aiTask";
 import { fitGanttLabels, updateGanttNow } from "./ganttLabels";
 import { JsonTaskImportModal } from "./taskImport";
@@ -30,6 +30,7 @@ export class DashboardView extends ItemView {
   private ctaLabel?: HTMLElement;
   private keyHandler?: (e: KeyboardEvent) => void;
   private serial = 0;
+  private tasksReady = false;
   private lastRenderKey = "";
   private visitedReview = false;
   private readonly scrollCache = new Map<string, { body: number; timeline?: number; week?: number; ganttLeft?: number; ganttTop?: number }>();
@@ -80,8 +81,21 @@ export class DashboardView extends ItemView {
     }
     this.buildHeader(root);
     this.body = root.createDiv({ cls: "lubi-body" });
-    await this.plugin.tasks.load();
-    await this.render();
+    await this.loadAndRender();
+  }
+
+  private async loadAndRender(): Promise<void> {
+    this.body.setAttribute("aria-busy", "true");
+    this.body.empty();
+    this.body.createDiv({ cls: "lubi-load-state", text: "正在读取任务…", attr: { role: "status" } });
+    try { await this.plugin.tasks.load(); this.tasksReady = true; await this.render(); }
+    catch (error) {
+      this.body.empty();
+      const warning = this.body.createDiv({ cls: "lubi-read-warning", attr: { role: "alert" } });
+      warning.createEl("strong", { text: "任务暂不可读" });
+      warning.createDiv({ text: `未把读取失败当作空任务：${(error as Error).message}` });
+      button(warning, "重新读取任务", () => void this.loadAndRender());
+    } finally { this.body.setAttribute("aria-busy", "false"); }
   }
 
   private buildHeader(root: HTMLElement): void {
@@ -118,15 +132,11 @@ export class DashboardView extends ItemView {
     });
 
     const right = bar.createDiv({ cls: "lubi-topbar-right" });
-    const jsonImport = button(right, "JSON 任务导入", () => new JsonTaskImportModal(this.app, this.plugin, () => this.refresh()).open(), { icon: "braces", cls: "lubi-topbar-import" });
-    tip(jsonImport, "JSON 任务导入");
-    jsonImport.setAttribute("aria-label", "JSON 任务导入");
-    const ai = button(right, "AI 创建任务", () => new AiTaskModal(this.app, this.plugin, this.activeDate(), () => this.refresh()).open(), { icon: "sparkles", cls: "lubi-topbar-ai" });
-    tip(ai, "AI 创建任务");
-    ai.setAttribute("aria-label", "AI 创建任务");
+    const record = button(right, "记用时", () => openUnifiedRecord(this.plugin, this.activeDate(), {}, () => this.refresh()), { icon: "clock", cls: "lubi-topbar-record" });
+    tip(record, "记录真实投入；不会自动完成任务，也可切换记录支出");
     const cta = button(right, this.ctaText(), () => this.openNew(), { primary: true, icon: "plus", cls: "lubi-topbar-cta" });
     this.ctaLabel = cta.querySelector<HTMLElement>("span:not(.lubi-icon)") || undefined;
-    tip(cta, "新建（N）：统一任务表单，可填写预计及实际用时，或切换记录支出");
+    tip(cta, "新建任务（N）：先写任务与安排，需要时再展开更多信息");
     cta.createSpan({ cls: "lubi-kbd lubi-kbd-cta", text: "N" });
     iconButton(right, "more-horizontal", "更多", () => undefined, "lubi-more-btn").addEventListener("click", (e) => this.openMore(e));
 
@@ -137,17 +147,21 @@ export class DashboardView extends ItemView {
     }
   }
 
-  /** 唯一的新建入口：计划页可填写预计及实际用时；窗口顶部可随时切换 */
+  /** Ordinary creation is planning-only by default, on every page and schedule view. */
   openNew(): void {
-    if (this.tab === "tasks") new TaskModal(this.app, this.plugin, { defaults: { date: this.tasksState.selectedDate }, recordDate: this.tasksState.selectedDate, quickActual: this.tasksState.scheduleView === "calendar" && this.tasksState.period === "day", onSaved: () => this.refresh() }).open();
-    else new TaskModal(this.app, this.plugin, { defaults: { date: this.activeDate() }, recordDate: this.activeDate(), quickActual: true, onSaved: () => this.refresh() }).open();
+    new TaskModal(this.app, this.plugin, { defaults: { date: this.activeDate() }, recordDate: this.activeDate(), onSaved: () => this.refresh() }).open();
   }
 
   private openMore(e: MouseEvent): void {
     const menu = new Menu();
-    menu.addItem((i) => i.setTitle("工作复盘与整理").setIcon("clipboard-list").onClick(() => this.plugin.openProduct()));
+    menu.addItem((i) => i.setTitle("JSON 任务导入").setIcon("braces").onClick(() => new JsonTaskImportModal(this.app, this.plugin, () => this.refresh()).open()));
+    menu.addItem((i) => i.setTitle("AI 创建任务").setIcon("sparkles").onClick(() => new AiTaskModal(this.app, this.plugin, this.activeDate(), () => this.refresh()).open()));
     menu.addItem((i) => i.setTitle("打开日记文件").setIcon("file-text").onClick(() => void this.plugin.openJournal(this.activeDate())));
-    menu.addItem((i) => i.setTitle("导出数据 JSON").setIcon("download").onClick(() => void this.plugin.exportJson()));
+    menu.addItem((i) => i.setTitle("备份与恢复").setIcon("archive").onClick(() => {
+      // Web-owned host destination; the original Obsidian reference is not changed.
+      const host = this.app as unknown as { setting: { openTabById: (id: string) => void } };
+      host.setting.openTabById("lubi-backups");
+    }));
     menu.addItem((i) => i.setTitle("快捷键").setIcon("keyboard").onClick(() => new ShortcutsModal(this.app).open()));
     menu.addItem((i) => i.setTitle("设置").setIcon("settings").onClick(() => this.plugin.openSettings()));
     menu.showAtMouseEvent(e);
@@ -253,6 +267,7 @@ export class DashboardView extends ItemView {
   }
 
   async render(): Promise<void> {
+    if (!this.tasksReady) return;
     const serial = ++this.serial;
     const sameReview = this.tab === "review" && this.lastRenderKey.startsWith("review:");
     const active = document.activeElement as HTMLElement | null;
@@ -282,6 +297,14 @@ export class DashboardView extends ItemView {
     const scheduleChanged = this.tab === "tasks" && this.lastRenderKey.startsWith("tasks:") && this.lastRenderKey.split(":")[1] !== this.tasksState.scheduleView;
     const key = this.tab === "review" ? `review:${this.review.period}:${this.review.anchor}`
       : `tasks:${this.tasksState.scheduleView}:${this.tasksState.period}:${this.tasksState.selectedDate}`;
+    this.body.setAttribute("aria-busy", "true");
+    const loading = window.setTimeout(() => {
+      if (serial !== this.serial || !this.body.isConnected) return;
+      const old = this.body.querySelector(".lubi-load-state");
+      old?.remove();
+      const status = this.body.createDiv({ cls: "lubi-load-state", attr: { role: "status" }, text: this.lastRenderKey ? "正在更新…以下保留上次读到的结果，不代表本次读取完成。" : "正在读取…" });
+      this.body.prepend(status);
+    }, 150);
     const host = createDiv();
     host.addClass("lubi-page");
     const rerender = () => this.refresh();
@@ -294,11 +317,23 @@ export class DashboardView extends ItemView {
       else await renderTasks(this.plugin, host, this.tasksState.selectedDate, this.tasksState, rerender);
     } catch (e) {
       host.empty();
-      const err = host.createDiv({ cls: "lubi-error" });
-      err.createEl("strong", { text: "页面渲染出错" });
-      err.createEl("pre", { text: (e as Error).stack || String(e) });
-    }
+      const err = host.createDiv({ cls: "lubi-read-warning", attr: { role: "alert" } });
+      err.createEl("strong", { text: "数据暂不可读" });
+      err.createEl("p", { text: `未按空数据或 0 计算：${(e as Error).message}` });
+      button(err, "重新读取", () => void this.render());
+    } finally { window.clearTimeout(loading); }
     if (serial !== this.serial) return;
+    this.body.setAttribute("aria-busy", "false");
+    // Remember intentional disclosure choices on refresh, but never conceal a new read error.
+    if (key === this.lastRenderKey) for (const selector of [".lubi-personal-time", ".lubi-background-card"]) {
+      const previous = this.body.querySelector<HTMLDetailsElement>(selector);
+      const next = host.querySelector<HTMLDetailsElement>(selector);
+      if (previous && next && next.dataset.readState !== "error") {
+        const becameNonempty = selector === ".lubi-background-card" && !previous.querySelector(".lubi-execution-item") && !!next.querySelector(".lubi-execution-item");
+        const firstRecord = selector === ".lubi-personal-time" && !previous.querySelector(".lubi-personal-time-entry") && !!next.querySelector(".lubi-personal-time-entry");
+        if (!becameNonempty && !firstRecord) next.open = previous.open;
+      }
+    }
     const planDetails = host.querySelector<HTMLDetailsElement>(".lubi-plan-task-details");
     if (planDetails) planDetails.open = key === this.lastRenderKey ? this.body.querySelector<HTMLDetailsElement>(".lubi-plan-task-details")?.open ?? true : true;
     const bodyScroll = this.body.scrollTop;

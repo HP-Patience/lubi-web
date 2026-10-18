@@ -1,3 +1,4 @@
+import "./require-original-ui.mjs";
 // Independent reference rendering: original plugin + original in-memory test host,
 // with separately recorded native Obsidian host primitives (see test/fixtures/).
 // Uses synthetic fixtures only. No user's Vault is loaded.

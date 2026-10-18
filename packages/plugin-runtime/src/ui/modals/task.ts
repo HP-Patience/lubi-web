@@ -1,6 +1,7 @@
 import { App, Modal, Notice } from "obsidian";
 import type LubiPlugin from "../../main";
 import { arrangeLightTaskForm } from "../lightTask";
+import { arrangeNewTaskForm } from "../planningForm";
 import { nameSuggestions } from "../nameSuggestions";
 import { formatEstimateComparison, isPending, normalizeEstimatedMinutes, PENDING_KEY, Rec } from "../../core/records";
 import { Task, blankTask, RepeatKind } from "../../core/tasks";
@@ -43,6 +44,8 @@ export class TaskModal extends Modal {
   private dateInput?: HTMLInputElement;
   private estimateInput?: HTMLInputElement;
   private estimateInvalid = false;
+  private estimateText?: string;
+  private projectNameDraft = "";
   private actualText = "";
   private actualStart = "";
   private actualDate: string;
@@ -77,6 +80,8 @@ export class TaskModal extends Modal {
     this.completeActual = !!opts.completeWithRecord;
     this.initial = JSON.stringify(this.t);
   }
+
+  private get planningForm(): boolean { return !this.opts.actualRequired && !this.opts.actualDefaults; }
 
   private get lightPlanning(): boolean { return this.editing && !this.opts.actualRequired && !this.opts.actualDefaults; }
 
@@ -140,13 +145,17 @@ export class TaskModal extends Modal {
   private render(focusTitle = false): void {
     const { contentEl, titleEl } = this;
     const lightMoreOpen = contentEl.querySelector<HTMLDetailsElement>(".lubi-light-more")?.open || false;
-    const planningOpen = contentEl.querySelector<HTMLDetailsElement>(".lubi-time-plan-details")?.open || !!this.opts.focusDate;
+    const planningOpen = contentEl.querySelector<HTMLDetailsElement>(".lubi-time-plan-details")?.open ?? !!this.opts.focusDate;
+    const moreOpen = contentEl.querySelector<HTMLDetailsElement>(".lubi-new-task-more")?.open;
+    const actualOpen = contentEl.querySelector<HTMLDetailsElement>(".lubi-new-task-actual")?.open;
+    const previousExtras = contentEl.childElementCount ? new Set(Array.from(contentEl.querySelectorAll<HTMLElement>("[data-extra-name]")).filter(el => !el.hidden).map(el => el.dataset.extraName)) : undefined;
     contentEl.empty();
     this.completionChoice = undefined; this.completionInput = undefined; this.completionLabel = undefined; this.completionHint = undefined; this.saveButton = undefined;
     const parent = this.t.parent ? this.plugin.tasks.byId(this.t.parent) : null;
     this.modalEl.addClass("lubi-record-modal", "lubi-task-modal");
     this.modalEl.toggleClass("lubi-time-entry", !!this.opts.actualRequired);
     this.modalEl.toggleClass("lubi-light-task", this.lightPlanning);
+    this.modalEl.toggleClass("lubi-progressive-task", !this.editing && !this.opts.actualRequired);
     const s = this.plugin.settings;
     this.modalEl.style.setProperty("--chip", "var(--color-ink)");
     titleEl.empty();
@@ -259,7 +268,7 @@ export class TaskModal extends Modal {
     const estF = grid.createDiv({ cls: "lubi-field lubi-plan-full-field" });
     const estLabel = estF.createEl("label", { text: executorOf(this.t) === "background" ? "预计本人投入" : "预计用时" });
     const estWrap = estF.createDiv({ cls: "lubi-timebar-dur lubi-timebar-dur-block" });
-    const est = estWrap.createEl("input", { type: "text", value: this.t.estimate ? fmtDuration(this.t.estimate) : "", attr: { inputmode: "decimal", placeholder: "如 45min / 2.5h", autocomplete: "off" } });
+    const est = estWrap.createEl("input", { type: "text", value: this.estimateText ?? (this.t.estimate ? fmtDuration(this.t.estimate) : ""), attr: { inputmode: "decimal", placeholder: "如 45min / 2.5h", autocomplete: "off" } });
     associate(estLabel, est);
     this.estimateInput = est;
     const estHint = estWrap.createSpan({ cls: "lubi-timebar-unit is-static" });
@@ -270,8 +279,8 @@ export class TaskModal extends Modal {
       estHint.setText(v === null ? "?" : v ? `${v} min` : "min");
     };
     syncEst();
-    est.addEventListener("input", () => { clearFieldError(est); syncEst(); });
-    est.addEventListener("blur", () => { if (!this.estimateInvalid && this.t.estimate) est.value = fmtDuration(this.t.estimate); });
+    est.addEventListener("input", () => { this.estimateText = est.value; clearFieldError(est); syncEst(); });
+    est.addEventListener("blur", () => { if (!this.estimateInvalid && this.t.estimate) { est.value = fmtDuration(this.t.estimate); this.estimateText = est.value; } });
 
     contentEl.createEl("hr", { cls: "lubi-task-divider" });
 
@@ -339,31 +348,34 @@ export class TaskModal extends Modal {
     const extras = contentEl.createDiv({ cls: "lubi-extras" });
     const toggles = extras.createDiv({ cls: "lubi-extras-toggles" });
     const fields = extras.createDiv({ cls: "lubi-extras-fields" });
-    const optional = (label: string, iconName: string, build: (host: HTMLElement) => void, onClear: () => void, initiallyOpen: boolean) => {
+    const optional = (label: string, iconName: string, build: (host: HTMLElement) => void, _onClear: () => void, initiallyOpen: boolean) => {
       const tg = toggles.createEl("button", { cls: "lubi-ghost-btn" });
       icon(tg, iconName, "lubi-icon");
       tg.createSpan({ text: label });
       let box: HTMLElement | null = null;
+      tg.setAttribute("aria-expanded", "false");
       const open = () => {
-        if (box) return;
+        if (box) { box.hidden = false; tg.addClass("is-open"); tg.setAttribute("aria-expanded", "true"); return; }
         box = fields.createDiv({ cls: "lubi-field lubi-extra-field", attr: { "data-extra-name": label } });
         const head = box.createDiv({ cls: "lubi-extra-head" });
         head.createEl("label", { text: label });
         iconButton(head, "x", "收起", () => {
-          box?.remove();
-          box = null;
+          // Collapse only changes presentation; input nodes, drafts and task metadata stay intact.
+          if (box) box.hidden = true;
           tg.removeClass("is-open");
-          if (!this.lightPlanning) onClear();
+          tg.setAttribute("aria-expanded", "false");
+          tg.focus();
         }, "lubi-icon-btn-sm lubi-push-right");
         build(box);
         tg.addClass("is-open");
+        tg.setAttribute("aria-expanded", "true");
       };
       tg.addEventListener("click", (e) => {
         stopAll(e);
         open();
         (box?.querySelector("select, textarea, input") as HTMLElement | null)?.focus();
       });
-      if (initiallyOpen) open();
+      if (previousExtras?.has(label) ?? initiallyOpen) open();
     };
     optional("执行方式", "bot", (host) => {
       const select = host.createEl("select", { attr: { "aria-label": "执行方式", "data-task-executor": "select" } });
@@ -380,22 +392,23 @@ export class TaskModal extends Modal {
     optional("项目", "folder", (host) => {
       const select = host.createEl("select", { attr: { "aria-label": "所属项目", "data-task-project": "select" } });
       const newProjectValue = `__lubi_create_${nextFieldId()}`;
-      const refresh = () => { select.empty();select.createEl("option", { value: "", text: "不属于项目" }); for (const p of this.plugin.tasks.projectList) select.createEl("option", { value: p.id, text: p.title });if (this.lightPlanning) select.createEl("option", { value: newProjectValue, text: "＋ 创建新项目…", attr: { "data-project-create-option": "true" } });select.value = this.t.project || ""; };
+      const refresh = () => { select.empty();select.createEl("option", { value: "", text: "不属于项目" }); for (const p of this.plugin.tasks.projectList) select.createEl("option", { value: p.id, text: p.title });if (this.planningForm) select.createEl("option", { value: newProjectValue, text: "＋ 创建新项目…", attr: { "data-project-create-option": "true" } });select.value = this.t.project || ""; };
       refresh();select.addEventListener("change", () => {
-        if (this.lightPlanning && select.value === newProjectValue) { add.hidden = false; input.focus(); return; }
-        this.t.project = select.value || undefined;this.t.parent = null;if (this.lightPlanning) add.hidden = true;
+        if (this.planningForm && select.value === newProjectValue) { add.hidden = false; input.focus(); return; }
+        this.t.project = select.value || undefined;this.t.parent = null;if (this.planningForm) add.hidden = true;
       });
       const add = host.createDiv({ cls: "lubi-inline lubi-project-create" });
-      add.hidden = this.lightPlanning;
-      const input = add.createEl("input", { type: "text", attr: { placeholder: "新项目名称", "aria-label": "新项目名称", maxlength: "200", "data-task-project": "name" } });
+      add.hidden = this.planningForm;
+      const input = add.createEl("input", { type: "text", value: this.projectNameDraft, attr: { placeholder: "新项目名称", "aria-label": "新项目名称", maxlength: "200", "data-task-project": "name" } });
+      input.addEventListener("input", () => { this.projectNameDraft = input.value; });
       const create = button(add, "创建项目", async () => {
         if (this.creatingProject || this.saving) return;create.disabled = true;this.creatingProject = true;select.disabled = true;input.disabled = true;
-        try { const p = await this.plugin.tasks.addProject(input.value);if (this.actualClosed || !select.isConnected) return;this.t.project = p.id;this.t.parent = null;refresh();input.value = "";if (this.lightPlanning) add.hidden = true;this.syncDirty();select.focus(); }
+        try { const p = await this.plugin.tasks.addProject(input.value);if (this.actualClosed || !select.isConnected) return;this.t.project = p.id;this.t.parent = null;refresh();input.value = "";this.projectNameDraft = "";if (this.planningForm) add.hidden = true;this.syncDirty();select.focus(); }
         catch (e) { formError(this.contentEl, (e as Error).message); }
         finally { create.disabled = false;this.creatingProject = false;select.disabled = false;input.disabled = false; }
       }, { cls: "lubi-btn-sm" });
-      if (this.lightPlanning) button(add, "取消新建", () => { add.hidden = true;input.value = "";refresh();select.focus(); }, { cls: "lubi-btn-sm" });
-    }, () => { this.t.project = undefined;this.t.parent = null; }, this.lightPlanning || !!this.t.project);
+      if (this.planningForm) button(add, "取消新建", () => { add.hidden = true;input.value = "";this.projectNameDraft = "";refresh();select.focus(); }, { cls: "lubi-btn-sm" });
+    }, () => { this.t.project = undefined;this.t.parent = null; }, this.planningForm || !!this.t.project);
     const spanLabel = this.t.repeat.kind === "none" ? "任务跨度" : "生效范围";
     optional(spanLabel, "calendar-range", (host) => {
       const row = host.createDiv({ cls: "lubi-grid lubi-grid-2" });
@@ -504,6 +517,12 @@ export class TaskModal extends Modal {
         this.close();openUnifiedRecord(this.plugin, this.opts.recordDate || todayStr(), { task: this.t.id }, () => { this.plugin.refreshViews();this.opts.onSaved?.(this.plugin.tasks.byId(this.t.id) || this.t); }, this.opts.completionDate || this.opts.recordDate || this.t.date || todayStr());
       },
     });
+    if (!this.editing && !this.opts.actualRequired) arrangeNewTaskForm({
+      host: contentEl, task: this.t, plugin: this.plugin,
+      title: titleF, categories: cats, grid, start: startF, extras, actions,
+      actual: [actualHint, actualDetails, completion], moreOpen, actualOpen,
+      onCategory: category => { this.t.category = category; this.render(false); this.contentEl.querySelector<HTMLSelectElement>("[data-task-category]")?.focus(); },
+    });
     contentEl.onkeydown = (e) => {
       if (e.key === "Enter" && e.target === titleInput && !e.isComposing) {
         e.preventDefault();
@@ -543,7 +562,7 @@ export class TaskModal extends Modal {
 
   private async save(completeActual = this.completeActual): Promise<void> {
     if (this.saving || this.creatingProject) return;
-    if (!this.editing && this.opts.quickActual) {
+    if (!this.editing && this.opts.quickActual && this.opts.actualRequired) {
       const parsed = parseQuick(this.t.title, this.plugin.settings.categories.filter(c => c.kind === "time").map(c => c.name));
       if (parsed?.start && parsed.minutes === undefined && !this.actualText.trim()) { fieldError(this.actualInput, "已填写开始时间，请补填实际用时"); return; }
       if (parsed && (parsed.minutes || this.actualText.trim())) {

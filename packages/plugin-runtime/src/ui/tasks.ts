@@ -97,10 +97,24 @@ export async function renderTasks(plugin: LubiPlugin, host: HTMLElement, date: s
   const edit = (task: Task, occurrenceDate = date) => new TaskModal(plugin.app, plugin, { task, recordDate: occurrenceDate, onSaved: rerender }).open();
   const create = (defaults: Partial<Task> = {}) => new TaskModal(plugin.app, plugin, { defaults, onSaved: rerender }).open();
   let rows: ParsedLine[] = [], timeAvailable = true;
-  try { rows = await plugin.journal.read(date); } catch { timeAvailable = false; }
+  // Verify the selected day against storage; a failed read must not look like an empty cache.
+  try { rows = await plugin.journal.read(date, true); } catch { timeAvailable = false; }
   renderPlanningOverview(plugin, host, date, rows.map(row => row.rec), timeAvailable);
   const days = ganttWindow(state.selectedDate, state.period);
   const head = renderPlanningHead(host, state, days, rerender);
+  if (calendarDay && !timeAvailable) {
+    // A failed read is not an empty day. Keep task actions, never draw a false empty timeline.
+    const warning = host.createDiv({ cls: "lubi-read-warning", attr: { role: "alert" } });
+    warning.createEl("strong", { text: "用时暂不可读，日历记录未加载" });
+    warning.createDiv({ text: "未按 0 计算。下面仍可安排任务；恢复读取后再显示时间轴。" });
+    button(warning, "重新读取", rerender, { cls: "lubi-btn-sm" });
+    const fallback = host.createDiv({ cls: "lubi-tasks-top lubi-planning-top" });
+    const side = fallback.createDiv({ cls: "lubi-tasks-left lubi-task-lists" });
+    const main = fallback.createDiv({ cls: "lubi-planning-main" });
+    renderLists(plugin, side, date, rerender, openNew, edit, create, true, undefined, main, main);
+    renderPersonalTime(plugin, side, date, rows, false, rerender, openNew);
+    return;
+  }
   if (calendarDay) {
     const day = host.createDiv({ cls: "lubi-calendar-day" });
     await renderCalendarDay(plugin, day, date, rerender, (side, records) => {
@@ -139,10 +153,13 @@ export async function renderTasks(plugin: LubiPlugin, host: HTMLElement, date: s
 /** Read-only page metrics; background clocks never become journal minutes. */
 function renderPlanningOverview(plugin: LubiPlugin, host: HTMLElement, date: string, records: Rec[], timeAvailable: boolean): void {
   const intro = host.createDiv({ cls: "lubi-plan-intro" });
-  intro.createDiv({ cls: "lubi-plan-overline", text: "LUBI / PLAN & DO" });
-  intro.createEl("h1", { cls: "lubi-plan-heading", text: "任务与计划" });
-  intro.createDiv({ cls: "lubi-muted", text: "做完打勾，花了时间点「记用时」。Agent 后台与本人投入分开看。" });
-  const overview = host.createDiv({ cls: "lubi-plan-overview", attr: { "aria-label": `${date} 的计划摘要` } });
+  const heading = intro.createDiv();
+  heading.createEl("h1", { cls: "lubi-plan-heading", text: "任务与计划" });
+  heading.createDiv({ cls: "lubi-muted", text: "先安排，再行动。预计、用时和完成分别保存。" });
+  const tools = intro.createDiv({ cls: "lubi-context-tools", attr: { "aria-label": "执行与整理" } });
+  button(tools, "计时", () => plugin.openProduct("timer"), { icon: "timer", cls: "lubi-btn-sm" });
+  button(tools, "待整理", () => plugin.openProduct("backlog"), { icon: "inbox", cls: "lubi-btn-sm" });
+  const overview = host.createDiv({ cls: "lubi-plan-overview lubi-overview-compact", attr: { "aria-label": `${date} 的计划摘要` } });
   const scheduled = planOccurrences(plugin.tasks.all, [date]);
   const review = backgroundEntries(plugin.tasks.all, "review").length;
   const running = backgroundEntries(plugin.tasks.all, "running").length;
@@ -154,24 +171,30 @@ function renderPlanningOverview(plugin: LubiPlugin, host: HTMLElement, date: str
     const item = overview.createDiv({ cls: "lubi-plan-metric", attr: { "data-plan-metric": id } });
     item.createDiv({ cls: "lubi-plan-metric-label", text: label });
     item.createDiv({ cls: "lubi-plan-metric-value", text: value });
-    item.createDiv({ cls: "lubi-plan-metric-note", text: note });
+    item.setAttribute("aria-label", `${label} ${value}；${note}`);
+    item.setAttribute("title", note);
   };
   metric("todo", "当天待做", String(scheduled.filter(item => !item.done && !queued.has(item.task.id)).length), `${date} · 后台和待审核另列`);
   metric("review", "需我处理", String(review), "跨日期的待审核结果");
   metric("background", "Agent 后台", String(running), "手动标注 · 不计入本人用时");
-  metric("actual", "本人已记录", timeAvailable ? fmtDuration(minutes) : "—", !timeAvailable ? "用时暂不可读，未按 0 计算" : pending ? `${pending} 条按计划待确认未计入` : "本人记录之和，不是后台运行时间");
+  metric("actual", "本人已记录", timeAvailable ? fmtDuration(minutes) : "暂不可读", !timeAvailable ? "用时暂不可读，未按 0 计算" : pending ? `${pending} 条按计划待确认未计入` : "本人记录之和，不是后台运行时间");
+  if (timeAvailable && pending) overview.createDiv({ cls: "lubi-overview-notice", attr: { role: "status" }, text: `${pending} 条按计划待确认，尚未计入本人已记录。` });
+  if (!timeAvailable) overview.createDiv({ cls: "lubi-overview-notice", attr: { role: "alert" }, text: "用时读取失败，未按 0 计算。任务与后台队列仍可查看。" });
 }
 
 /** A small journal-backed sidebar, with the existing record editor for multi-segment safety. */
 function renderPersonalTime(plugin: LubiPlugin, host: HTMLElement, date: string, rows: ParsedLine[], available: boolean, rerender: () => void, openNew: OpenRecord): void {
-  const card = host.createDiv({ cls: "lubi-card lubi-section lubi-personal-time" });
-  const head = card.createDiv({ cls: "lubi-panel-head" });
-  head.createEl("h3", { cls: "lubi-panel-title", text: "我的用时" });
   const timed = rows.filter(row => row.rec.minutes > 0);
-  head.createSpan({ cls: "lubi-muted", text: date });
+  const card = host.createEl("details", { cls: "lubi-card lubi-section lubi-personal-time", attr: { "data-read-state": available ? "ready" : "error" } });
+  // Only a successfully read, genuinely empty panel is collapsed by default.
+  card.open = !available || timed.length > 0;
+  const head = card.createEl("summary", { cls: "lubi-panel-head", attr: { "data-lubi-focus": "personal-time-details" } });
+  head.createSpan({ cls: "lubi-panel-title", text: "我的用时" });
+  head.createSpan({ cls: "lubi-muted", text: !available ? "读取失败" : timed.length ? `${timed.length} 条 · ${date}` : "暂无记录" });
+  head.createSpan({ cls: "lubi-disclosure-chevron", text: "›", attr: { "aria-hidden": "true" } });
   card.createDiv({ cls: "lubi-muted lubi-execution-note", text: "来自本人日记；待确认会单独标注，不包含后台时长。" });
   const list = card.createDiv({ cls: "lubi-personal-time-list" });
-  if (!available) list.createDiv({ cls: "lubi-muted lubi-pad", attr: { role: "status" }, text: "用时暂不可读。任务仍可操作，可稍后刷新。" });
+  if (!available) list.createDiv({ cls: "lubi-muted lubi-pad", attr: { role: "alert" }, text: "用时暂不可读，未按 0 计算。任务仍可操作。" });
   else if (!timed.length) list.createDiv({ cls: "lubi-muted lubi-pad", text: "这一天还没有用时记录。" });
   for (const row of timed.slice(-4).reverse()) {
     const record = row.rec;
@@ -181,6 +204,7 @@ function renderPersonalTime(plugin: LubiPlugin, host: HTMLElement, date: string,
     entry.createSpan({ cls: "lubi-personal-time-meta", text: `${record.category} · ${record.start}${record.extra[PENDING_KEY] ? " · 待核对" : ""}` });
   }
   if (timed.length > 4) card.createDiv({ cls: "lubi-muted lubi-personal-time-more", text: `另有 ${timed.length - 4} 条，请在日历时间轴查看与编辑。` });
+  if (!available) button(card, "重新读取用时", rerender, { cls: "lubi-btn-sm" });
   button(card, "记一笔用时", () => openNew({}), { cls: "lubi-personal-time-add" });
   const background = host.querySelector(".lubi-background-card");
   if (background) background.after(card); else host.prepend(card);

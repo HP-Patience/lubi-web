@@ -27,6 +27,13 @@ export async function renderReview(plugin: LubiPlugin, host: HTMLElement, state:
   host.empty();
   host.addClass("lubi-review");
   const { from, to, label, buckets } = range(state);
+  const intro = host.createDiv({ cls: "lubi-plan-intro" });
+  const heading = intro.createDiv();
+  heading.createEl("h1", { cls: "lubi-plan-heading", text: "回顾与成果" });
+  heading.createDiv({ cls: "lubi-muted", text: "看看真实投入，再决定下一步。" });
+  const tools = intro.createDiv({ cls: "lubi-context-tools", attr: { "aria-label": "复盘工具" } });
+  button(tools, "投入与成果", () => plugin.openProduct("cost"), { cls: "lubi-btn-sm" });
+  button(tools, "周复盘", () => plugin.openProduct("review"), { cls: "lubi-btn-sm" });
 
   // 工具条
   const bar = host.createDiv({ cls: "lubi-toolbar" });

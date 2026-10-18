@@ -1,3 +1,4 @@
+// Web review acceptance: approved entry/layout changes; business assertions retained.
 // Public import button + clipboard prompt + atomic append. Synthetic memory Vault only.
 import assert from 'node:assert/strict';
 import * as O from '../helpers/mock-obsidian.js';
@@ -8,12 +9,12 @@ const load=Module._load;Module._load=function(id,...args){return id==='obsidian'
 const Plugin=createRequire(import.meta.url)(process.env.LUBI_TEST_PLUGIN||'../.out/plugin.cjs').default;
 const app=new O.App(),plugin=new Plugin(app,{id:'lubi',version:'1.6.0'});await plugin.onload();await plugin.tasks.load();
 const path=plugin.settings.taskFile,wait=()=>new Promise(r=>setTimeout(r,230));const view=await plugin.activateView('tasks','2026-10-08');await wait();const root=view.contentEl;
-const button=root.querySelector('.lubi-topbar-import');assert(button&&button.nextElementSibling===root.querySelector('.lubi-topbar-ai'));assert(!button.classList.contains('mod-cta'));button.click();const modal=O.openModals.at(-1);assert.equal(modal.constructor.name,'JsonTaskImportModal');modal.close();
+root.querySelector('.lubi-more-btn').click();const item=O.menus.at(-1).items.find(i=>i.title==='JSON 任务导入');assert(item);assert(!root.querySelector('.lubi-topbar-import'));item.cb();const modal=O.openModals.at(-1);assert.equal(modal.constructor.name,'JsonTaskImportModal');modal.close();
 await plugin.tasks.upsert(blankTask({id:'existing',title:'已有任务',notes:'必须保留',category:'学习',customField:{keep:true}}));
 const raw=JSON.parse(app.vault.files.get(path));raw.customRoot={keep:true};app.vault.files.set(path,JSON.stringify(raw));await plugin.tasks.load(true);
 const parsed=()=>JSON.parse(app.vault.files.get(path));const count=()=>plugin.tasks.all.length;
 const fixture={tasks:[{title:'主任务',category:'学习',location:'图书馆',date:'2026-10-08',subtasks:[{title:'子任务',start:'09:00',estimate:60}]}]};
-const input=(m,text)=>{const i=m.contentEl.querySelector('textarea');i.value=text;i.dispatchEvent(new window.Event('input',{bubbles:true}));};const submit=m=>m.contentEl.querySelector('.mod-cta').click();const open=()=>{root.querySelector('.lubi-topbar-import').click();return O.openModals.at(-1)};
+const input=(m,text)=>{const i=m.contentEl.querySelector('textarea');i.value=text;i.dispatchEvent(new window.Event('input',{bubbles:true}));};const submit=m=>m.contentEl.querySelector('.mod-cta').click();const open=()=>{root.querySelector('.lubi-more-btn').click();O.menus.at(-1).items.find(i=>i.title==='JSON 任务导入').cb();return O.openModals.at(-1)};
 let m=open(),before=JSON.stringify([...app.vault.files]);input(m,'{"tasks":[{"title":"有效"},{"title":"坏日期","date":"wrong"}]}');submit(m);await wait();assert(O.openModals.includes(m));assert(!m.contentEl.querySelector('.lubi-form-error').hidden);assert.equal(JSON.stringify([...app.vault.files]),before);m.close();
 m=open();input(m,JSON.stringify(fixture));before=app.vault.files.get(path);submit(m);submit(m);await wait();assert(!O.openModals.includes(m));assert.equal(count(),3);assert.equal(parsed().tasks.length,3);assert.deepEqual(parsed().customRoot,{keep:true});assert.deepEqual(parsed().tasks.find(t=>t.id==='existing').customField,{keep:true});assert.equal(app.vault.files.get(plugin.tasks.lastImportBackup),before);assert.equal(plugin.tasks.all.find(t=>t.title==='子任务').parent,plugin.tasks.all.find(t=>t.title==='主任务').id);assert(![...app.vault.files.keys()].some(name=>name.startsWith('日记/')));
 assert.equal(parsed().tasks.find(t=>t.title==='主任务').location,'图书馆');assert.equal(parsed().tasks.find(t=>t.title==='子任务').location,'');

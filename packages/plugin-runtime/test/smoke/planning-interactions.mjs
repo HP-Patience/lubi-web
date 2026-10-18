@@ -1,3 +1,4 @@
+// Web review acceptance: approved entry/layout changes; business assertions retained.
 import assert from 'node:assert/strict';
 import * as O from '../helpers/mock-obsidian.js';
 import Module from 'node:module';
@@ -29,9 +30,9 @@ for(const mode of ['calendar','gantt','list'])for(const period of ['day','week',
  assert.equal(root.querySelectorAll('.lubi-schedule-switch').length,1);
  assert.equal(root.querySelectorAll('.lubi-planning-period-switch').length,1);
  assert.equal(root.querySelectorAll('.lubi-topbar .mod-cta').length,1);
- const aiButton=root.querySelector('.lubi-topbar-ai');assert(aiButton&&aiButton.nextElementSibling===root.querySelector('.lubi-topbar-cta'));
- const beforeAi=JSON.stringify([...app.vault.files]);aiButton.click();await settle();const aiModal=O.openModals.at(-1);assert.equal(aiModal.constructor.name,'AiTaskModal');assert.equal(aiModal.date,D);aiModal.close();assert.equal(JSON.stringify([...app.vault.files]),beforeAi,'opening/canceling AI does not create tasks or records');
- assert(!root.querySelector('.lubi-error'));
+ const recordButton=root.querySelector('.lubi-topbar-record');assert(recordButton&&recordButton.nextElementSibling===root.querySelector('.lubi-topbar-cta'));root.querySelector('.lubi-more-btn').click();const aiItem=O.menus.at(-1).items.find(i=>i.title==='AI 创建任务');assert(aiItem);
+ const beforeAi=JSON.stringify([...app.vault.files]);aiItem.cb();await settle();const aiModal=O.openModals.at(-1);assert.equal(aiModal.constructor.name,'AiTaskModal');assert.equal(aiModal.date,D);aiModal.close();assert.equal(JSON.stringify([...app.vault.files]),beforeAi,'opening/canceling AI does not create tasks or records');
+ assert(!root.querySelector('.lubi-read-warning'));
  const sidebar=root.querySelector('.lubi-task-lists'),main=root.querySelector('.lubi-planning-main, .lubi-today-main');
  assert.equal(main.nextElementSibling,sidebar,'main content precedes the right sidebar in reading and keyboard order');
  if(mode==='calendar'&&period==='week') {
@@ -66,7 +67,7 @@ for(const mode of ['calendar','gantt','list'])for(const period of ['day','week',
   const progress=side.querySelector('[role="progressbar"]');
   assert.equal(Number(progress.getAttribute('aria-valuemax')),tasks.length);
   assert.equal(Number(progress.getAttribute('aria-valuenow')),1,'repeat completion is for selected occurrence');
-  assert.deepEqual([...side.children].slice(0,5).map(e=>e.classList.contains('lubi-background-card')?'background':e.classList.contains('lubi-personal-time')?'time':e.classList.contains('lubi-distribution')?'distribution':e.classList.contains('lubi-plan-card')?'plans':'inbox'),['background','time','distribution','plans','inbox']);assert.equal(root.querySelector('.lubi-today-main').firstElementChild,root.querySelector('.lubi-attention-card'));
+  assert.deepEqual([...side.children].slice(0,5).map(e=>e.classList.contains('lubi-background-card')?'background':e.classList.contains('lubi-personal-time')?'time':e.classList.contains('lubi-distribution')?'distribution':e.classList.contains('lubi-plan-card')?'plans':'inbox'),['background','time','distribution','plans','inbox']);assert.equal(root.querySelector('.lubi-attention-card'),null,'No empty review panel; nonempty cross-date queues have dedicated tests');
   const summary=root.querySelector('.lubi-today-summary'),head=root.querySelector('.lubi-planning-head');
   assert.equal(root.querySelectorAll('.lubi-today-summary').length,1);
   assert.equal(summary.parentElement,head);assert.equal(summary.previousElementSibling,head.querySelector('.lubi-schedule-range'));
@@ -111,8 +112,8 @@ view.refresh();await settle();assert.equal(root.querySelector('.lubi-plan-progre
 assert.equal(root.querySelector('.lubi-donut-center').textContent,'1.1h');
 // Shared summary read errors surface in the existing page error boundary.
 const originalRead=plugin.journal.read;plugin.journal.read=async()=>{throw new Error('synthetic summary read failure')};
-view.refresh();await settle();assert(root.querySelector('.lubi-error'));
-plugin.journal.read=originalRead;view.refresh();await settle();assert(!root.querySelector('.lubi-error'));
+view.refresh();await settle();assert(root.querySelector('.lubi-read-warning'));
+plugin.journal.read=originalRead;view.refresh();await settle();assert(!root.querySelector('.lubi-read-warning'));
 // New day card keeps the existing inbox drop and quick-add paths.
 await plugin.tasks.upsert(task('day-drop'));view.refresh();await settle();
 const card=root.querySelector('.lubi-plan-card');
@@ -232,5 +233,5 @@ assert(flat.querySelector('[data-task-id="flat-root"]'),'parent with actual reco
 assert.equal(emptyView.contentEl.querySelector('.lubi-plan-progress').getAttribute('aria-valuemax'),'4');
 assert.equal(emptyView.contentEl.querySelector('.lubi-plan-progress').getAttribute('aria-valuenow'),'0','actual record is not completion');
 console.log('PASS flat daily actions: date-only grouping parents excluded, context metadata, progress, time ordering, editing, independent parents and actual records retained');
-assert(!root.querySelector('.lubi-error'));emptyPlugin.onunload();plugin.onunload();await view.onClose();await fresh.view.onClose();await emptyView.onClose();
+assert(!root.querySelector('.lubi-read-warning'));emptyPlugin.onunload();plugin.onunload();await view.onClose();await fresh.view.onClose();await emptyView.onClose();
 console.log('PASS planning interactions: nine modes, shared navigation, clean views, date moves, recurrence edit/completion, parent context, empty axes and session defaults');

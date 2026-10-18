@@ -12,7 +12,7 @@ export class App {
   plugin: any;
   setting = {
     open: () => {},
-    openTabById: (_id: string) => openSettings(this),
+    openTabById: (id: string) => openSettings(this, id),
   };
   bindCommandShortcut() {
     bindCommandShortcut(this);

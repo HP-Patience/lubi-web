@@ -6,9 +6,11 @@ import { join } from 'node:path';
 const cwd=fileURLToPath(new URL('../packages/plugin-runtime/',import.meta.url));
 const env={...process.env,LUBI_TEST_PLUGIN:join(cwd,'test/.out/plugin.cjs')};
 const types=process.argv.slice(2).length?process.argv.slice(2):['core','smoke'];
+console.log('Web acceptance: declared presentation adaptations; original reference tests remain in the immutable baseline.');
 const run=args=>{const result=spawnSync(process.execPath,args,{cwd,stdio:'inherit',env});if(result.status!==0)process.exit(result.status||1);};
 run(['scripts/build-tests.mjs']);
 if(types.includes('layout')){
+  await import('./require-original-ui.mjs');
   env.LUBI_REQUIRE_BROWSER='1';
   if(!env.LUBI_BROWSER){
     const {chromium}=await import('playwright');

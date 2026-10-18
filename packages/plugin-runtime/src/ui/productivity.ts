@@ -16,10 +16,9 @@ export class ProductivityModal extends Modal {
   onOpen(): void {
     this.modalEl.addClass('lubi-product-modal','lubi-modal');
     this.contentEl.createEl('style', { text: `.lubi-product-modal{width:min(880px,95vw)}.lubi-product-modal .product-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}.lubi-product-modal .product-nav button[aria-pressed=true]{background:var(--interactive-accent);color:var(--text-on-accent)}.lubi-product-modal label{display:block;margin:12px 0 5px}.lubi-product-modal input:not([type=checkbox]),.lubi-product-modal select,.lubi-product-modal textarea{width:100%;max-width:100%;box-sizing:border-box}.lubi-product-modal textarea{min-height:90px}.lubi-product-modal button{margin:5px 8px 5px 0;white-space:normal;height:auto;min-height:32px}.lubi-product-modal .product-box{padding:12px;border:1px solid var(--background-modifier-border);border-radius:8px;margin:12px 0}.lubi-product-modal .product-list{max-height:300px;overflow:auto;border:1px solid var(--background-modifier-border);border-radius:8px;margin:8px 0 12px}.lubi-product-modal .product-list label{display:flex;align-items:center;gap:8px;margin:0;padding:7px 10px;border-top:1px solid var(--background-modifier-border);font-size:var(--font-ui-small)}.lubi-product-modal .product-list label:first-child{border-top:0}.lubi-product-modal .product-list label:hover{background:var(--background-secondary)}.lubi-product-modal p{font-size:var(--font-ui-small);color:var(--text-muted);line-height:1.6;margin:8px 0}.lubi-product-modal p,.lubi-product-modal pre{overflow-wrap:anywhere;white-space:pre-wrap}.lubi-product-modal .modal-content{max-height:80vh;overflow:auto}.lubi-product-modal .product-status{color:var(--text-muted)}@media(max-width:500px){.lubi-product-modal .product-nav button{flex:1 1 42%}}` });
-    this.contentEl.createEl('h2', { text: 'Lubi · 工作复盘与整理' });
-    const nav = this.contentEl.createDiv('product-nav');
-    const tabs: [ProductTab,string][] = [['cost','投入与成果'],['review','周复盘'],['backlog','待整理'],['timer','实时计时'],['restore','数据恢复']];
-    for (const [id,text] of tabs) { const b=nav.createEl('button',{text}); b.setAttribute('aria-pressed',String(this.tab===id)); b.onclick=()=>{ if(this.working)return; this.tab=id; for(const el of Array.from(nav.querySelectorAll('button')))el.setAttribute('aria-pressed',String(el===b)); void this.render(); }; }
+    const titles: Record<ProductTab,string> = {cost:'投入与成果',review:'周复盘',backlog:'待整理',timer:'实时计时',restore:'恢复业务数据 JSON'};
+    this.titleEl.setText(titles[this.tab]);
+    this.contentEl.createEl('p', { cls: 'product-context', text: this.tab==='restore' ? '备份与恢复 / 业务数据' : this.tab==='cost'||this.tab==='review' ? '回顾 / '+titles[this.tab] : '计划 / '+titles[this.tab] });
     this.body=this.contentEl.createDiv(); void this.render();
   }
   onClose(): void { this.generation++; if(this.interval!==undefined) window.clearInterval(this.interval); this.contentEl.empty(); }
@@ -123,7 +122,7 @@ export class ProductivityModal extends Modal {
     this.button(this.body,'放弃计时',()=>new ConfirmModal(this.app,'放弃计时','清除计时会话，不删除已成功保存的记录；未保存时间将丢失。',()=>void this.act(async()=>{await this.plugin.product.discardTimer();await this.render();}),'放弃',false).open());
   }
   private restore():void {
-    this.text(this.body,'只恢复到新的隔离目录，绝不覆盖当前任务、日记或设置。完整导出不包含原日记其他章节或插件设置，因此不是整库备份。');
+    this.text(this.body,'只接受由「导出数据 JSON」生成的 lubi-data 完整业务导出，恢复到全新隔离目录。它包含任务、项目和记录，不含日记其他章节、设置或密钥；不是 Web 文件备份，也不是 SQLite 整库备份。当前任务、日记和设置不会被覆盖。');
     this.button(this.body,'先导出当前数据',()=>this.plugin.exportJson());
     const file=this.input(this.body,'选择完整导出 JSON','','file');file.accept='.json,application/json';
     const status=this.body.createDiv('product-box');let text='';

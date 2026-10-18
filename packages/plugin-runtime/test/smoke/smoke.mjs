@@ -1,3 +1,4 @@
+// Web review acceptance: declared compact-summary and entry changes; other assertions retained.
 import * as O from "../helpers/mock-obsidian.js";
 import { fixtureVault } from "../helpers/fixtures.mjs";
 import Module from "module";
@@ -89,14 +90,15 @@ view.show('tasks', '2026-11-01'); await tick();
 check([...root.querySelectorAll('.lubi-week-date')].map(e=>e.textContent).join(',') === '10/26,10/27,10/28,10/29,10/30,10/31,11/1', 'week headers retain actual months across a month boundary');
 view.show('tasks', '2026-09-24'); await tick();
 
-check(!root.querySelector(".lubi-task-lists.lubi-card") && root.querySelector(".lubi-task-lists .lubi-inbox-card.lubi-card") && root.querySelector(".lubi-attention-card")?.parentElement?.classList.contains("lubi-planning-main"), "MONO hierarchy: attention in main, independent background/time/inbox sidebar cards");
+check(!root.querySelector(".lubi-attention-card") && !!root.querySelector(".lubi-tasks-left .lubi-background-card") && !!root.querySelector(".lubi-tasks-left .lubi-personal-time") && !!root.querySelector(".lubi-tasks-left .lubi-inbox-card"), "Web hierarchy: no empty attention card; background/time/inbox remain discoverable");
 check(!root.querySelector(".lubi-selected-day-list .lubi-panel-head button") && root.querySelector(".lubi-inbox-card .lubi-inbox-add"), "MONO: no duplicate day-create button, distinct unplanned create retained");
 check(root.querySelectorAll(".mod-cta").length === 1 && root.querySelector(".lubi-quick-add input"), "simplify: task page has one primary CTA and keeps quick input");
 root.querySelector(".lubi-more-btn").click();
-const aiButton = root.querySelector(".lubi-topbar-ai");
-check(!!aiButton && aiButton.nextElementSibling === root.querySelector(".lubi-topbar-cta") && !aiButton.classList.contains("mod-cta"), "AI entry: secondary button immediately left of new task");
-check(!O.menus.at(-1).items.some(i => i.title === "AI 创建任务") && !root.querySelector(".lubi-list-card").textContent.includes("AI 创建"), "AI entry: moved out of more menu without duplicate list entry");
-aiButton.click(); await tick();
+const recordButton = root.querySelector(".lubi-topbar-record");
+check(!!recordButton && recordButton.nextElementSibling === root.querySelector(".lubi-topbar-cta") && !recordButton.classList.contains("mod-cta"), "Web entry: explicit actual action beside new task");
+const aiItem=O.menus.at(-1).items.find(i=>i.title==='AI 创建任务');
+check(!!aiItem && !root.querySelector('.lubi-topbar-ai'), "Web AI entry: one discoverable more-menu item");
+aiItem.cb(); await tick();
 check(O.openModals.at(-1)?.constructor.name === "AiTaskModal" && O.openModals.at(-1).date === "2026-09-24", "simplify: moved AI entry opens the original modal for the selected date");
 O.openModals.at(-1)?.close();
 check(JSON.stringify([...app.vault.files]) === beforeSimplifiedRender, "simplify: viewing all pages, expanding analysis and opening AI do not rewrite data");

@@ -1,3 +1,4 @@
+import "../scripts/require-original-ui.mjs";
 // Real Obsidian acceptance, NOT the mock-host preview. All data is synthetic.
 // Never open/read the owner's Vault, configuration, journal or credentials.
 import assert from 'node:assert/strict';

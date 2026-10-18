@@ -1,0 +1,92 @@
+{
+  "version": 2,
+  "baselineCommit": "a6c02ea644457cb400153bf208a363fbde4e36c6",
+  "approval": "2026-10-18: allow_web_ui_changes; review before deployment",
+  "changed": {
+    "test/browser.mjs": {
+      "baselineSha256": "4927a1a218e2c2b8c865af2b485c1311d83b1621a4d7e2e682b4b5a6453cb145",
+      "webSha256": "f1187634c236afa1ea8c5a6c755fc2737368eb93be6ff1db4af67d69c6426d7f",
+      "reason": "Keep 22 business workflows; navigate approved entries/disclosures. Replace obsolete native pixel equality with explicitly labelled Web geometry/interaction scenes."
+    },
+    "packages/plugin-runtime/test/smoke/ai-task-location.mjs": {
+      "baselineSha256": "d2e0ca334d4afea691b0f38acd952a3dcb9669a7c5a41ce412a3e8dcaa914ff0",
+      "webSha256": "32158ef0b8eab6ff0a1e57eb888659aea456f10b255a8770f8922e62581d1b3d",
+      "reason": "AI entry moves to More; keep every prompt, location, inheritance, validation and cancellation assertion."
+    },
+    "packages/plugin-runtime/test/smoke/planning-interactions.mjs": {
+      "baselineSha256": "9ef464c145133fc989ec7a28f5524e034e91459ac140d2975894df90898bbc16",
+      "webSha256": "f7dffdb0f1960ebd8e12aa3ec52653c1ad34a3258a7ff0575ddc9411cd44ed32",
+      "reason": "More-menu AI, explicit actual CTA, no empty attention card, readable journal-failure fallback; keep nine-mode navigation, moves, recurrence and data assertions."
+    },
+    "packages/plugin-runtime/test/smoke/task-json-import.mjs": {
+      "baselineSha256": "0c951babd2d5b7903b14a1cb9e28ca1cd07ca9aaa2fe330bc81fcff9d7fdcef6",
+      "webSha256": "5b23359515dd3109ea6c2f2185c75938ce174bbc2e6994d824cbeac7ccc11aa7",
+      "reason": "JSON entry moves to More; keep parser, backups, duplicate/concurrency/collision assertions."
+    },
+    "packages/plugin-runtime/test/smoke/data-export.mjs": {
+      "baselineSha256": "b49ad20e695b93d2a190db4cb800ada9c4dd69b951bf2269d209fb6e6f7f3369",
+      "webSha256": "82e8194c7908afac892de815e56471b2a36c15ec2304701b3de39dbf706ee9f7",
+      "reason": "Export command ID remains; backup-center discoverability replaces old direct menu entry. The browser suite covers actual host export/restore buttons; data/failure tests retained."
+    },
+    "packages/plugin-runtime/test/smoke/monochrome.mjs": {
+      "baselineSha256": "88b3a6ff921ecc179f8e4dfb5761fded475d5f94fcc8755c76edf9b3c231bd9a",
+      "webSha256": "3dd07a503af9a4fbf3a7fee89c9c3b4d3c80ef82ef8b2bc48f870336208c97fb",
+      "reason": "Pending actual note is now one overview notice instead of a duplicate metric note; numerical and state assertions retained."
+    },
+    "packages/plugin-runtime/test/smoke/smoke.mjs": {
+      "baselineSha256": "a1d9ebb88962ade0c9ac6fd90727f85b6a803f0b8f6889f571a7becbf8026cf7",
+      "webSha256": "9a86bfd3f5f0fcbd4c18fbf8c5fab29dd0bb0d043e03f3ac87b943969648d4b1",
+      "reason": "Update only empty-attention and AI-entry presentation assertions; retain the broad original interaction/data suite."
+    },
+    "packages/plugin-runtime/test/smoke/unified-actual.mjs": {
+      "baselineSha256": "203955d48cb9ee1e7477ea119ca9e949de22699d3aef344e74c1452238662729",
+      "webSha256": "15a2005f934f4da43605e0439c01a2bf2249c99e7f843d656d7e098484730841",
+      "reason": "Assert progressive task/plan/actual grouping instead of HR/sibling layout. Open actual disclosure before focus. Quick parsing tested through explicit actual entry; all persistence and concurrency checks retained."
+    },
+    "scripts/reference-pages.mjs": {
+      "baselineSha256": "59143ba3415e7bb925e655d2026ac29695421e7d00df9f311c460fa0daf38763",
+      "webSha256": "e5c1bd688fc7906a16c9f6a75afca6377f7292e75d4dbc213ccb6337ff449774",
+      "reason": "Refuse to relabel revised Web source as an original-plugin reference."
+    },
+    "test/native.mjs": {
+      "baselineSha256": "25bd0631c3572e13b5dc81779473ba02a29aaaf920e15133ccb4dd22dd9f2a4d",
+      "webSha256": "9f74a09092957c27d06b384de689ebb71503832c77aa44b327a114851386dbaf",
+      "reason": "Guard historical exact-native-UI comparison on redesigned Web sources; no fake skipped pass."
+    },
+    "scripts/run-plugin-tests.mjs": {
+      "baselineSha256": "702305d80ce548e40bb36ca3f5fa8ccb4a742366f3b026d49571454513d2e0cb",
+      "webSha256": "d48e19454715dcbebfa516f60205166cf6c0cc378cc320032cc914dffda823d4",
+      "reason": "Label active Web contract; refuse historical layout assumptions on the redesigned branch."
+    }
+  },
+  "added": {
+    "test/ui-capture.mjs": {
+      "webSha256": "6d423bec8c0eb6e9c3ad317b3547bde35413f860b08d16c585380edaebdde024",
+      "purpose": "Same-fixture before/after screenshots and visible-input measurements; baseline is captured before any Web bundle rebuild."
+    },
+    "test/ui-review.mjs": {
+      "webSha256": "69d16ecab124f1ba2089c8836dddb28d9076d613af0a619b9120d69b80443b7a",
+      "purpose": "Production-bundle cognitive-simplification tests, explicit failures/loading, draft retention and format boundaries."
+    },
+    "test/ui-layout.mjs": {
+      "webSha256": "bf32ac837acc1fd3431ea0fb4318e9e073427a45c17439d6214fecdbb57d9b00",
+      "purpose": "50 Web layout scenes across widths/themes/views/forms; not native pixel parity."
+    },
+    "scripts/require-original-ui.mjs": {
+      "webSha256": "d54aafa4049840ff882cb5c54fd99eb934cf05cb835c076eb2cee3c5cc412b4b",
+      "purpose": "Fail-closed protection of historical reference provenance."
+    }
+  },
+  "replacedContract": {
+    "old": "Original-plugin pixel parity below 2.5%, original UI sibling/position assertions",
+    "new": "Preserved core/services/style hashes; approved Web UI ownership; unchanged business assertions plus declared layout/entry adaptations; 22 browser workflows; 15 focused UI checks; 50 layout scenes",
+    "nativeReference": "Historical Phase A evidence only; not regenerated from this revised source"
+  },
+  "forbidden": [
+    "Rewrite UPSTREAM.json",
+    "Loosen an old visual threshold while claiming native parity",
+    "Hide failures as zero",
+    "Overwrite the live database from a browser",
+    "Use owner data in tests"
+  ]
+}

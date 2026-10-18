@@ -1,3 +1,4 @@
+// Web review acceptance: approved entry/layout changes; business assertions retained.
 // Approved MONO integration against the actual bundle; synthetic memory Vault only.
 import assert from 'node:assert/strict';
 import Module from 'node:module';
@@ -108,7 +109,7 @@ const independent=plugin.tasks.all.find(task=>task.title==='合成独立用时')
 
 // A planned, unconfirmed backfill is not counted as verified human effort.
 await plugin.journal.add({date:D,start:'13:00',minutes:20,title:'合成计划待确认',category:'学习',extra:{[PENDING_KEY]:'按计划'}});await settle();
-assert.equal(root.querySelector('[data-plan-metric=actual] .lubi-plan-metric-value').textContent,'24min');assert(root.querySelector('[data-plan-metric=actual] .lubi-plan-metric-note').textContent.includes('未计入'));
+assert.equal(root.querySelector('[data-plan-metric=actual] .lubi-plan-metric-value').textContent,'24min');assert(root.querySelector('.lubi-overview-notice').textContent.includes('未计入'));
 assert(root.querySelector('.lubi-personal-time-list').textContent.includes('待核对'));assert.equal((await rows(running.id)).length,0,'background clocks never create journal minutes');
 for(const value of ['0','25h','abc']){form=await open({actualRequired:true,defaults:{title:'无效独立用时'+value}});input(form,'[data-actual=minutes]',value);const before=bytes();await save(form);assert(O.openModals.includes(form));assert.equal(bytes(),before);form.close();}
 assert.equal(JSON.stringify(plugin.settings.categories),categorySnapshot,'stored category names and colors are unchanged');
