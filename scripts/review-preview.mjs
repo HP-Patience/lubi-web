@@ -16,10 +16,13 @@ async function renew(){const r=await fetch(app.base+'/api/auth/login',{method:'P
 const server=createServer(async(req,res)=>{
  try{
   const url=new URL(req.url,'http://review.invalid');
+  // Fail closed on route aliases; this proxy deliberately disables all network/key writes.
+  if(url.pathname.includes('%')||url.pathname.includes('//')||url.pathname.includes('\\')){res.writeHead(400,{'content-type':'application/json'});res.end(JSON.stringify({error:'合成审核拒绝非规范路径。请使用界面中的正常入口。'}));return;}
+  const routePath=url.pathname.toLowerCase();
   if(url.pathname==='/__review/demo.css'){res.writeHead(200,{'content-type':'text/css'});res.end(css);return;}
   if(url.pathname==='/__review/banner.js'){res.writeHead(200,{'content-type':'text/javascript'});res.end(script);return;}
   if(url.pathname==='/__review/info'){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({syntheticOnly:true,productionTouched:false,externalAiDisabled:true,fixtureDate}));return;}
-  if(url.pathname.startsWith('/api/network/')||(url.pathname.startsWith('/api/secrets')&&!['GET','HEAD'].includes(req.method))){res.writeHead(403,{'content-type':'application/json'});res.end(JSON.stringify({error:'公用审核演示不发起真实 AI 请求，也不接受真实密钥。正式版实现未改变；AI 与密钥流程已由隔离模拟测试覆盖。'}));return;}
+  if(routePath.startsWith('/api/network')||(routePath.startsWith('/api/secrets')&&!['GET','HEAD'].includes(req.method))){res.writeHead(403,{'content-type':'application/json'});res.end(JSON.stringify({error:'公用审核演示不发起真实 AI 请求，也不接受真实密钥。正式版实现未改变；AI 与密钥流程已由隔离模拟测试覆盖。'}));return;}
   const chunks=[];let bytes=0;for await(const chunk of req){bytes+=chunk.length;if(bytes>26*1024*1024){res.writeHead(413);res.end('Review upload too large');return;}chunks.push(chunk);}
   const body=chunks.length?Buffer.concat(chunks):undefined;
   const options=()=>({method:req.method,headers:{cookie,origin:app.base,...(req.headers['content-type']?{'content-type':req.headers['content-type']}:{} )},body,redirect:'manual'});
