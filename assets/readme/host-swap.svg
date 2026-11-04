@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340" role="img" aria-labelledby="title desc">
+  <title id="title">一套业务引擎，两个宿主</title>
+  <desc id="desc">左侧 packages/plugin-runtime 是 Lubi 1.8.0 业务引擎（schema v14，64 个源文件字节一致），向右同时供两个宿主使用：原始的 Obsidian 插件宿主，以及本仓库新增的 Web 宿主（apps/web 与 apps/api）。两者各用独立 SQLite，Web 不打开、不同步原 Vault。</desc>
+
+  <rect width="1200" height="340" rx="24" fill="#0F1012"/>
+
+  <g id="engine">
+    <rect x="64" y="64" width="336" height="188" rx="14" fill="#15161A" stroke="#2A2E34"/>
+    <text x="88" y="100" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#7E848D">packages/plugin-runtime</text>
+    <text x="88" y="144" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="24" font-weight="700" fill="#F3F1EC">业务引擎</text>
+    <text x="88" y="178" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="18" fill="#A6ACB5">Lubi 1.8.0 · schema v14</text>
+    <text x="88" y="206" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="18" fill="#A6ACB5">64 个源文件与样式字节一致</text>
+    <text x="88" y="234" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="18" fill="#A6ACB5">核心、服务、后端不改</text>
+  </g>
+
+  <g id="bus" stroke="#3A404A" stroke-width="1.5" fill="none">
+    <path d="M400 158 H470"/>
+    <path d="M470 100 V216"/>
+    <path d="M470 100 H588"/>
+    <path d="M470 216 H588"/>
+    <path d="M588 100 l-10 -5 v10 z" fill="#3A404A" stroke="none"/>
+    <path d="M588 216 l-10 -5 v10 z" fill="#3A404A" stroke="none"/>
+  </g>
+
+  <g id="host-obsidian">
+    <rect x="596" y="56" width="540" height="88" rx="14" fill="#15161A" stroke="#2A2E34"/>
+    <text x="620" y="94" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="21" font-weight="700" fill="#F3F1EC">Obsidian 插件宿主（原始）</text>
+    <text x="620" y="124" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#7E848D">1.13.7 · 桌面 · 原 Vault</text>
+  </g>
+
+  <g id="host-web">
+    <rect x="596" y="172" width="540" height="88" rx="14" fill="#16181C" stroke="#D9A34C" stroke-opacity="0.55"/>
+    <text x="620" y="210" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="21" font-weight="700" fill="#F3F1EC">Web 宿主（本仓库）</text>
+    <text x="620" y="240" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#7E848D">apps/web · apps/api · 浏览器</text>
+  </g>
+
+  <g id="data-boundary">
+    <line x1="64" y1="292" x2="1136" y2="292" stroke="#262A30"/>
+    <text x="64" y="322" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="18" fill="#8A9099">两边各用独立 SQLite：Web 用 data/lubi.db，不打开、不扫描、不同步原 Vault。</text>
+  </g>
+</svg>
