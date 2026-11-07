@@ -351,4 +351,3 @@
   .lubi-root .lubi-topbar-right { grid-column: 1 !important; grid-row: 2 !important; width: 100%; margin-left: 0; justify-content: flex-end; }
   .lubi-root .lubi-topbar-tabs { grid-column: 1 !important; grid-row: 3 !important; display: flex; width: 100%; margin-left: 0; }
 }
-
