@@ -76,9 +76,9 @@ try {
   await page.locator('[data-lubi-focus="schedule:list"]').click();await ready();await newTask('跨日期后台审核');await details('.lubi-new-task-more');await modal().locator('.lubi-extras-toggles button').filter({hasText:'执行方式'}).click();await page.getByLabel('执行方式',{exact:true}).selectOption('background');await saveTask();
   const task=(await store()).tasks.find(t=>t.title==='跨日期后台审核'),before=await journal();
   await page.locator(`.lubi-task[data-task-id="${task.id}"]`).hover();await page.locator(`.lubi-task[data-task-id="${task.id}"] [data-background-action="running"]`).click();await page.locator(`.lubi-background-card [data-task-id="${task.id}"]`).waitFor();
-  await page.locator(`.lubi-background-card [data-task-id="${task.id}"] [data-background-action="review"]`).click();await page.locator(`.lubi-attention-card [data-task-id="${task.id}"]`).waitFor();await page.locator('[data-lubi-focus="planning:next"]').click();await ready();
+  await page.locator(`.lubi-background-card [data-task-id="${task.id}"] [data-background-action="review"]`).click();await page.locator(`.lubi-attention-card [data-task-id="${task.id}"]`).waitFor();await page.locator('[data-lubi-focus="icon:后一天（→）"]').click();await ready();
   const review=page.locator(`.lubi-attention-card [data-task-id="${task.id}"]`);await review.waitFor();assert.match(await review.innerText(),/发生日 2026-10-18/);assert.equal(await page.locator('.lubi-attention-card').evaluate(e=>!!e.closest('details:not([open])')),false);assert.equal(await journal(),before);await shot('cross-date-review');
-  await page.locator('[data-lubi-focus="planning:previous"]').click();await ready();
+  await page.locator('[data-lubi-focus="icon:前一天（←）"]').click();await ready();
  });
  await step('Fresh journal failure is unknown, not zero; error stays expanded and retry restores real data',async()=>{
   const personal=page.locator('.lubi-personal-time');if(await personal.evaluate(e=>e.open))await personal.locator(':scope > summary').click();

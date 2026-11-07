@@ -9,7 +9,7 @@
 .lubi-overview-compact .lubi-plan-metric:first-child { padding-left:0; }
 .lubi-overview-compact .lubi-plan-metric[data-plan-metric="actual"] { border-right:0; }
 .lubi-overview-compact .lubi-plan-metric-label { margin:0; font-size:12px; color:var(--text-muted); }
-.lubi-overview-compact .lubi-plan-metric-value { margin:0; font-size:21px; line-height:1.2; font-weight:650; letter-spacing:-.5px; }
+.lubi-overview-compact .lubi-plan-metric-value { margin:0; font-size:21px; line-height:1.2; font-weight:650; letter-spacing:-.5px; white-space:nowrap; }
 .lubi-overview-notice { flex-basis:100%; margin-top:10px; font-size:12px; color:var(--text-muted); }
 .lubi-personal-time > summary { cursor:pointer; list-style:revert; padding:14px 16px; margin:0; }
 .lubi-personal-time > summary .lubi-panel-title { font-size:13px; }
@@ -63,7 +63,7 @@
  .lubi-overview-compact .lubi-plan-metric { flex-basis:50%; padding:2px 12px; gap:8px; box-sizing:border-box; }
  .lubi-overview-compact .lubi-plan-metric:nth-child(odd) { padding-left:0; }
  .lubi-overview-compact .lubi-plan-metric:nth-child(even) { border-right:0; }
- .lubi-overview-compact .lubi-plan-metric-value { font-size:19px; }
+ .lubi-overview-compact .lubi-plan-metric-value { font-size:19px; white-space:nowrap; }
  .lubi-topbar-right .lubi-topbar-record { padding:5px 10px; }
  .lubi-topbar-right .lubi-topbar-record .lubi-icon { width:14px; height:14px; }
  .web-backup-card { padding:14px; }
@@ -75,7 +75,7 @@
   --color-canvas: #f7f5f0;
   --color-surface: #fbfaf7;
   --color-ink: #20242a;
-  --color-muted: #73777b;
+  --color-muted: #686c70;
   --color-border: #d9d8d2;
   --color-control-border: #c9c8c1;
   --lubi-accent: #c9963e;
@@ -87,10 +87,10 @@
   --background-modifier-border: #d9d8d2;
   --background-modifier-hover: rgba(32, 36, 42, .045);
   --text-normal: #20242a;
-  --text-muted: #73777b;
+  --text-muted: #686c70;
   --text-faint: #a3a5a5;
   --interactive-accent: #20242a;
-  --text-accent: #a77727;
+  --text-accent: #8e6424;
   --shadow-default: none;
   background: var(--color-canvas);
   color: var(--color-ink);
@@ -198,7 +198,8 @@
 .lubi-root .lubi-focus-side > .lubi-section + .lubi-section { margin-top:0; }
 
 .lubi-root .lubi-focus-timer .lubi-panel-title { font-size:15px; }
-.lubi-root .lubi-focus-timer.is-live { border-left:3px solid var(--lubi-accent); }
+.lubi-root .lubi-focus-timer.is-live,
+.lubi-root .lubi-focus-timer:has(.lubi-panel-head.is-live) { border-left:3px solid var(--lubi-accent); }
 .lubi-root .lubi-focus-timer-body { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
 .lubi-root .lubi-focus-timer-task { font-size:15px; font-weight:600; overflow-wrap:anywhere; }
 .lubi-root .lubi-focus-timer-clock {
@@ -378,6 +379,284 @@
 .lubi-root .lubi-review .lubi-chart-line,
 .lubi-root .lubi-review .lubi-chart-point { stroke: var(--lubi-accent); }
 
+/* ---------------------------------------------------------------------------
+   Minimal chrome. The page is a reading surface: navigation is type, not a nest
+   of rounded boxes. Only the primary action keeps a filled shape.
+   --------------------------------------------------------------------------- */
+.lubi-root .lubi-topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  min-height: 0;
+  padding: 0 0 16px;
+  gap: 24px;
+  border-bottom: 0;
+  background: transparent;
+}
+.lubi-root .lubi-page > .lubi-topbar { padding: 0; border: 0; background: transparent; }
+.lubi-root .lubi-topbar-left { min-width: 0; }
+.lubi-root .lubi-topbar-right { min-width: 0; flex-wrap: wrap; row-gap: 6px; }
+.lubi-root .lubi-date-picker { width: 0 !important; min-width: 0; padding: 0; border: 0; }
+.lubi-root .lubi-today-btn.is-hidden { display: none !important; }
+.lubi-root .lubi-day-nav { gap: 2px; }
+.lubi-root .lubi-day-nav .lubi-icon-btn { width: 26px; height: 28px; }
+.lubi-root .lubi-date-label,
+.lubi-root button.lubi-date-label:not(.clickable-icon) {
+  min-width: 0;
+  height: 28px;
+  padding: 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.lubi-root .lubi-today-badge { display: none; }
+.lubi-root .lubi-topbar .lubi-today-btn {
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.lubi-root .lubi-topbar .lubi-today-btn:hover { color: var(--color-ink); }
+
+/* Page tabs: two words with a quiet active rule. */
+.lubi-root .lubi-topbar .lubi-seg {
+  padding: 0;
+  gap: 20px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.lubi-root .lubi-topbar button.lubi-seg-item:not(.clickable-icon) {
+  position: relative;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+.lubi-root .lubi-topbar button.lubi-seg-item:not(.clickable-icon):hover {
+  background: transparent;
+  color: var(--color-ink);
+}
+.lubi-root .lubi-topbar button.lubi-seg-item[aria-pressed="true"]:not(.clickable-icon) {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.lubi-root .lubi-topbar button.lubi-seg-item[aria-pressed="true"]:not(.clickable-icon)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1px;
+  height: 2px;
+  background: var(--color-ink);
+}
+
+.lubi-root .lubi-topbar-right button.lubi-topbar-record.lubi-btn:not(.clickable-icon) {
+  height: 30px;
+  padding: 0 6px;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.lubi-root .lubi-topbar-right button.lubi-topbar-record.lubi-btn:not(.clickable-icon):hover {
+  background: transparent;
+  color: var(--color-ink);
+}
+.lubi-root .lubi-topbar-right .lubi-more-btn { color: var(--color-muted); }
+.lubi-root .lubi-topbar-right button.lubi-topbar-cta.lubi-btn:not(.clickable-icon) {
+  height: 32px;
+  padding: 0 12px;
+  gap: 6px;
+  border-radius: 6px;
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-canvas);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.lubi-root .lubi-topbar-right .lubi-kbd-cta { display: none; }
+
+/* Page intro: title and tools share a baseline; tools are text, not buttons. */
+.lubi-root .lubi-plan-intro { align-items: flex-start; margin-bottom: 0; }
+.lubi-root .lubi-plan-intro .lubi-plan-heading {
+  margin-bottom: 5px;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -.04em;
+}
+.lubi-root .lubi-plan-intro .lubi-muted { font-size: 12px; line-height: 1.5; }
+.lubi-root .lubi-context-tools { gap: 16px; padding-top: 2px; }
+.lubi-root .lubi-context-tools button.lubi-btn:not(.clickable-icon) {
+  height: 26px;
+  min-height: 26px;
+  padding: 0;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-muted);
+  font-size: 13px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.lubi-root .lubi-context-tools button.lubi-btn:not(.clickable-icon):hover {
+  background: transparent;
+  color: var(--color-ink);
+}
+.lubi-root .lubi-context-tools .lubi-icon svg { width: 14px; height: 14px; }
+@media (pointer: coarse) {
+  .lubi-root .lubi-context-tools button.lubi-btn:not(.clickable-icon) { height: auto; min-height: 44px; }
+}
+
+/* Metrics: one measured line. No rules, no dividers, no cards. */
+.lubi-root .lubi-overview-compact {
+  gap: 8px 32px;
+  margin-bottom: 4px;
+  padding: 0;
+  border: 0;
+}
+.lubi-root .lubi-overview-compact .lubi-plan-metric {
+  padding: 0;
+  gap: 8px;
+  border: 0;
+}
+.lubi-root .lubi-overview-compact .lubi-plan-metric-label {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+.lubi-root .lubi-overview-compact .lubi-plan-metric-value {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+.lubi-root .lubi-overview-compact .lubi-plan-metric.is-zero .lubi-plan-metric-value {
+  color: var(--color-muted);
+  font-weight: 500;
+}
+.lubi-root .lubi-overview-notice {
+  flex-basis: 100%;
+  margin-top: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+/* Schedule controls: the same typographic tabs, plus a borderless date step. */
+.lubi-root .lubi-planning-head {
+  gap: 24px;
+  min-height: 30px;
+  margin-bottom: 16px;
+}
+.lubi-root .lubi-planning-head .lubi-seg {
+  padding: 0;
+  gap: 18px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.lubi-root .lubi-planning-head button.lubi-seg-item:not(.clickable-icon) {
+  position: relative;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+.lubi-root .lubi-planning-head button.lubi-seg-item:not(.clickable-icon):hover {
+  background: transparent;
+  color: var(--color-ink);
+}
+.lubi-root .lubi-planning-head button.lubi-seg-item[aria-pressed="true"]:not(.clickable-icon) {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.lubi-root .lubi-planning-head button.lubi-seg-item[aria-pressed="true"]:not(.clickable-icon)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--color-ink);
+}
+.lubi-root .lubi-planning-nav {
+  gap: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.lubi-root .lubi-planning-head .lubi-planning-period-switch { position: relative; margin-left: 8px; }
+.lubi-root .lubi-planning-head .lubi-planning-period-switch::before {
+  content: "";
+  position: absolute;
+  left: -16px;
+  top: 8px;
+  width: 1px;
+  height: 12px;
+  background: var(--color-border);
+}
+/* On the focused day the topbar already owns the date and the step controls.
+   The schedule stepper would only repeat the same day a second time. */
+.lubi-root .lubi-page:has(.lubi-focus-layout) .lubi-planning-nav { display: none; }
+.lubi-root .lubi-background-card.is-empty { display: none; }
+.lubi-root .lubi-planning-nav button.lubi-icon-btn:not(.clickable-icon) {
+  width: 26px;
+  height: 28px;
+  color: var(--color-muted);
+}
+.lubi-root .lubi-planning-nav .lubi-nav-date {
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+.lubi-root .lubi-planning-nav button.lubi-icon-btn:not(.clickable-icon):hover { color: var(--color-ink); background: transparent; }
+
+@media (max-width: 900px) {
+  .lubi-root .lubi-topbar { padding: 10px 16px; }
+  .lubi-root .lubi-page { padding-top: 20px; }
+}
+@media (max-width: 700px) {
+  .lubi-root .lubi-page > .lubi-topbar.lubi-topbar { padding: 0 !important; gap: 6px; }
+  .lubi-root .lubi-topbar .lubi-seg { gap: 16px; }
+  .lubi-root .lubi-topbar button.lubi-seg-item:not(.clickable-icon) { height: 32px; }
+  .lubi-root .lubi-plan-intro { align-items: flex-start; gap: 8px; }
+  .lubi-root .lubi-plan-intro .lubi-plan-heading { font-size: 24px; }
+  .lubi-root .lubi-context-tools { margin-left: auto; gap: 12px; padding-top: 2px; }
+  .lubi-root .lubi-context-tools button.lubi-btn:not(.clickable-icon) { height: 28px; min-height: 28px; padding: 0; font-size: 12px; }
+  .lubi-root .lubi-overview-compact { column-gap: 0; row-gap: 8px; margin-bottom: 4px; }
+  .lubi-root .lubi-overview-compact .lubi-plan-metric { flex-basis: 50%; }
+  .lubi-root .lubi-planning-head { gap: 18px; }
+  .lubi-root .lubi-planning-head .lubi-seg { gap: 14px; }
+  .lubi-root .lubi-planning-head .lubi-planning-period-switch { margin-left: 4px; }
+  .lubi-root .lubi-planning-head .lubi-planning-period-switch::before { left: -11px; }
+  .lubi-root .lubi-topbar-right .lubi-context-tools { margin-left: 0; gap: 12px; }
+  .lubi-root .lubi-page:has(.lubi-focus-layout) .lubi-context-tools > .lubi-btn:first-child { display: none; }
+}
+
 @media (max-width: 1100px) {
   .lubi-root .lubi-shell { grid-template-columns: 72px minmax(0, 1fr); }
   .lubi-root .lubi-rail { padding: 16px 8px 12px; }
@@ -443,6 +722,7 @@
   .lubi-root .lubi-topbar-left .lubi-today-btn { display: none; }
   .lubi-root .lubi-topbar-right { grid-row: 2; width: 100%; margin-left: 0; gap: 8px; }
   .lubi-root .lubi-topbar-right .lubi-btn { flex: 1; height: 32px; justify-content: center; }
+  .lubi-root .lubi-topbar-right .lubi-btn.lubi-topbar-cta { flex: 0 0 40px; width: 40px; min-width: 40px; padding: 0; }
   .lubi-root .lubi-topbar-right .lubi-more-btn { flex: 0 0 32px; width: 32px; }
   .lubi-root .lubi-kbd-cta { display: none; }
   .lubi-root .lubi-topbar-tabs { grid-row: 3; width: 100%; margin-left: 0; }
@@ -450,7 +730,7 @@
   .lubi-root .lubi-plan-intro { flex-wrap: wrap; gap: 10px; }
   .lubi-root .lubi-plan-heading { font-size: 26px; }
   .lubi-root .lubi-focus-timer-clock { font-size: 40px; }
-  .lubi-root .lubi-overview-compact .lubi-plan-metric-value { font-size: 18px; }
+  .lubi-root .lubi-overview-compact .lubi-plan-metric-value { font-size: 18px; white-space:nowrap; }
 }
 
 .lubi-root .lubi-background-card > summary { font-size:13px; min-height:20px; }
@@ -477,3 +757,136 @@
 .lubi-root .lubi-review-trend .lubi-chart { max-height: 340px; }
 .lubi-root .lubi-review-trend .lubi-bars { min-height: 0; }
 .lubi-root .lubi-review-empty-note { font-size: 12px; }
+
+/* The topbar context is hidden on narrow layouts; let the review toolbar
+   reveal its own range label instead of leaving the arrows without a period. */
+@media (max-width: 700px) {
+  .lubi-root .lubi-review .lubi-toolbar .lubi-nav-label {
+    position: static; width: auto; height: auto; margin: 0;
+    overflow: visible; clip: auto; clip-path: none;
+    white-space: nowrap; font-size: 12px; color: var(--color-muted);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Dark counterpart. The light palette above is deliberately applied to
+   .lubi-root regardless of theme; without this block those aliases shadow the
+   dark tokens, so controls stay light while text turns light — 1:1 contrast.
+   Keep the same alias graph and only patch the surfaces that are literal.
+   --------------------------------------------------------------------------- */
+.theme-dark .lubi-root,
+.lubi-root.theme-dark {
+  --lubi-accent: #d6a64c;
+  --lubi-border: var(--color-border);
+  --lubi-line: #2f2f36;
+  --lubi-card-bg: var(--color-surface);
+  --background-primary: var(--color-canvas);
+  --background-secondary: var(--color-surface);
+  --background-modifier-border: var(--color-border);
+  --background-modifier-hover: rgba(244, 244, 244, .06);
+  --text-normal: var(--color-ink);
+  --text-muted: var(--color-muted);
+  --text-faint: #7c7c86;
+  --interactive-accent: var(--color-ink);
+  --text-accent: #d6a64c;
+}
+.theme-dark .lubi-root .lubi-rail-link.is-active {
+  background: color-mix(in srgb, var(--lubi-accent) 14%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--lubi-accent) 32%, var(--color-border));
+  color: var(--color-ink);
+}
+.theme-dark .lubi-root .lubi-task:hover { background: rgba(244, 244, 244, .045); }
+.theme-dark .lubi-root .lubi-task:hover .lubi-task-start,
+.theme-dark .lubi-root .lubi-task:focus-within .lubi-task-start { border-color: var(--color-border); color: var(--color-ink); }
+.theme-dark .lubi-root .lubi-task .lubi-task-title-button:hover { color: #e0b467; }
+.theme-dark .lubi-root .lubi-focus-timer-clock { color: #e2b66b; }
+.theme-dark .lubi-root .lubi-focus-timer-clock.is-long { color: #ecc98a; }
+.theme-dark .lubi-root .lubi-task-unlogged { color: #d6a64c; border-color: color-mix(in srgb, var(--lubi-accent) 65%, transparent); }
+.theme-dark .lubi-root .lubi-personal-time-entry { background: #232329 !important; }
+.theme-dark .lubi-root .lubi-personal-time-entry:hover { background: #2c2c33 !important; border-color: var(--color-border) !important; }
+.theme-dark .lubi-root .lubi-plan-progress { background: #303038; }
+.theme-dark .lubi-root .lubi-plan-progress-fill { background: #8a6a34; }
+.theme-dark .lubi-root .lubi-date-label.is-today { color: #d6a64c; }
+.theme-dark .lubi-root .lubi-task.is-done input[type="checkbox"] { accent-color: #8a8a94; }
+.theme-dark .web-settings-focused .web-settings-nav button[aria-selected="true"] {
+  background: #2f2f37; border-color: #41414a; color: var(--text-normal);
+}
+.theme-dark .web-settings-focused .web-backup-format { background: #2a2a31; }
+.theme-dark .web-settings-focused .web-backup-card:last-of-type { border-left-color: #6f5b37; }
+
+/* A repeated per-row action should not compete with the task title at rest.
+   It becomes a real control when the row is inspected or on touch pointers.
+   The selector also has to outrank the generic .lubi-btn shape in 07. */
+.lubi-root .lubi-task .lubi-task-start.lubi-btn:not(.clickable-icon) {
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-muted);
+}
+.lubi-root .lubi-task:hover .lubi-task-start.lubi-btn:not(.clickable-icon),
+.lubi-root .lubi-task:focus-within .lubi-task-start.lubi-btn:not(.clickable-icon),
+.lubi-root .lubi-task-start.lubi-btn:not(.clickable-icon):focus-visible {
+  border-color: var(--color-border);
+  background: transparent;
+  color: var(--color-ink);
+}
+@media (pointer: coarse) {
+  .lubi-root .lubi-task .lubi-task-start.lubi-btn:not(.clickable-icon) { border-color: var(--color-border); }
+}
+
+/* The range and the nav label repeat the same date. Keep the range in the DOM
+   for tests/assistive tech, but let the nav label carry it visually. */
+.lubi-root .lubi-planning-head > .lubi-schedule-range { display: none; }
+
+/* Current task title hover needs a darker warm ink to stay readable. */
+.lubi-root .lubi-task .lubi-task-title-button:hover { color: #8e6424; }
+
+/* ---------------------------------------------------------------------------
+   Motion. Short, state-change only, and built on the existing ease tokens.
+   The chart reveal uses backwards fill so the generated clip-path is gone when
+   the animation ends and the value label above the bar is not permanently cut.
+   --------------------------------------------------------------------------- */
+@keyframes lubi-page-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes lubi-dialog-enter { from { opacity: 0; transform: translateY(6px) scale(.995); } to { opacity: 1; transform: none; } }
+@keyframes lubi-backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lubi-pop-enter { from { opacity: 0; transform: translateY(-3px) scale(.995); } to { opacity: 1; transform: none; } }
+@keyframes lubi-notice-enter { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes lubi-bars-enter { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes lubi-live-pulse { 0%, 100% { opacity: .35; transform: scale(.9); } 50% { opacity: 1; transform: scale(1); } }
+@keyframes lubi-login-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.lubi-root .lubi-page-enter { animation: lubi-page-enter 180ms var(--lubi-ease, cubic-bezier(.2,.8,.2,1)) both; }
+.modal-container .modal-bg { animation: lubi-backdrop-enter 160ms ease-out both; }
+.modal-container > .modal { animation: lubi-dialog-enter 180ms var(--lubi-ease, cubic-bezier(.2,.8,.2,1)) both; }
+.menu { animation: lubi-pop-enter 120ms var(--lubi-ease, cubic-bezier(.2,.8,.2,1)) both; }
+.notice { animation: lubi-notice-enter 200ms var(--lubi-ease, cubic-bezier(.2,.8,.2,1)) both; }
+.web-login-card { animation: lubi-login-enter 260ms var(--lubi-ease, cubic-bezier(.2,.8,.2,1)) both; }
+.lubi-root .lubi-focus-timer .lubi-panel-head.is-live .lubi-panel-title::after {
+  content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 8px;
+  border-radius: 50%; background: var(--lubi-accent); vertical-align: middle;
+  animation: lubi-live-pulse 2.4s ease-in-out infinite;
+}
+.lubi-root .lubi-review .lubi-bars > .lubi-bar-col .lubi-bar-stack {
+  animation: lubi-bars-enter 360ms var(--lubi-ease, cubic-bezier(.2,.8,.2,1)) backwards;
+}
+.lubi-root .lubi-review .lubi-bars > .lubi-bar-col:nth-child(2) .lubi-bar-stack { animation-delay: 20ms; }
+.lubi-root .lubi-review .lubi-bars > .lubi-bar-col:nth-child(3) .lubi-bar-stack { animation-delay: 40ms; }
+.lubi-root .lubi-review .lubi-bars > .lubi-bar-col:nth-child(4) .lubi-bar-stack { animation-delay: 60ms; }
+.lubi-root .lubi-review .lubi-bars > .lubi-bar-col:nth-child(5) .lubi-bar-stack { animation-delay: 80ms; }
+.lubi-root .lubi-review .lubi-bars > .lubi-bar-col:nth-child(6) .lubi-bar-stack { animation-delay: 100ms; }
+.lubi-root .lubi-review .lubi-bars > .lubi-bar-col:nth-child(7) .lubi-bar-stack { animation-delay: 120ms; }
+.lubi-root .lubi-review .lubi-bars > .lubi-bar-col:nth-child(8) .lubi-bar-stack { animation-delay: 140ms; }
+.lubi-root .lubi-review .lubi-bars > .lubi-bar-col:nth-child(9) .lubi-bar-stack { animation-delay: 160ms; }
+.lubi-root .lubi-review .lubi-bars > .lubi-bar-col:nth-child(10) .lubi-bar-stack { animation-delay: 180ms; }
+.lubi-root .lubi-review .lubi-bars > .lubi-bar-col:nth-child(11) .lubi-bar-stack { animation-delay: 200ms; }
+.lubi-root .lubi-review .lubi-bars > .lubi-bar-col:nth-child(12) .lubi-bar-stack { animation-delay: 220ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lubi-root .lubi-page-enter,
+  .modal-container .modal-bg,
+  .modal-container > .modal,
+  .menu,
+  .notice,
+  .web-login-card,
+  .lubi-root .lubi-review .lubi-bars > .lubi-bar-col .lubi-bar-stack,
+  .lubi-root .lubi-focus-timer .lubi-panel-head.is-live .lubi-panel-title::after { animation: none !important; }
+}

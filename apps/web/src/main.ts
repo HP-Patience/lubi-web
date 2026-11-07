@@ -18,7 +18,7 @@ function login(resume=false){
   for(const {element} of suspended)element.inert=true;
   if(!resume)root.replaceChildren();
   const host=(resume?document.body:root).createDiv({cls:'web-login'+(resume?' web-login-overlay':'')});
-  const form=host.createEl('form',{cls:'web-login-card'});form.createEl('span',{text:'LUBI / PRIVATE WORKSPACE',cls:'web-eyebrow'});
+  const form=host.createEl('form',{cls:'web-login-card'});form.createEl('span',{text:'Lubi · 私有工作区',cls:'web-eyebrow'});
   form.createEl('h1',{text:resume?'继续你的工作。':'开始记录。'});
   form.createEl('p',{text:resume?'会话已过期。重新登录后，未保存的表单仍在原处。':'与插件相同的计划、记录与回顾，保存在独立数据库。'});
   const label=form.createEl('label',{text:'访问密码',attr:{for:'login-password'}});

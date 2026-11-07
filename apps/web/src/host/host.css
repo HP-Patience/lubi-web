@@ -66,7 +66,7 @@ button:disabled { cursor:default; opacity:.55; }
 .web-boot h1 { margin:0; letter-spacing:-1px; font-size:38px; }
 .web-boot p { max-width:560px; line-height:1.8; color:var(--text-muted); }
 .web-login-card { width:min(400px,100%); }
-.web-eyebrow { font-size:10px; letter-spacing:2px; color:var(--text-muted); }
+.web-eyebrow { font-size:11px; letter-spacing:.12em; color:var(--text-muted); }
 .web-login-card h1 { font-size:34px; font-weight:600; letter-spacing:-1px; margin:20px 0 12px; }
 .web-login-card p { color:var(--text-muted); line-height:1.8; font-size:13px; }
 .web-login-card label { display:block; font-size:12px; margin-top:28px; }

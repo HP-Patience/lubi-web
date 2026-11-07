@@ -24,6 +24,7 @@ export class DashboardView extends ItemView {
   review: ReviewState = { period: "week", anchor: todayStr(), display: "chart" };
   tasksState: TasksState = { selectedDate: todayStr(), scheduleView: "list", period: "day", ganttCollapsed: new Set() };
   private body!: HTMLElement;
+  private topbar?: HTMLElement;
   private railLinks?: HTMLElement[];
   private dateLabel!: HTMLElement;
   private todayBtn!: HTMLButtonElement;
@@ -111,8 +112,8 @@ export class DashboardView extends ItemView {
       b.addEventListener("click", onClick);
       return b;
     };
-    tip(railButton("今天", "calendar-days", "today", () => { this.setDate(todayStr()); this.setTab("tasks"); }), "回到今天的计划（T）");
-    tip(railButton("计划", "calendar", "plan", () => this.setTab("tasks")), "计划视图（1）");
+    tip(railButton("今天", "calendar-days", "today", () => this.openToday()), "回到今天的计划（T）");
+    tip(railButton("计划", "calendar", "plan", () => this.openPlan()), "计划视图（1）");
     tip(railButton("回顾", "chart-column", "review", () => this.setTab("review")), "回顾视图（2）");
     const railSide = rail.createDiv({ cls: "lubi-rail-side" });
     const backup = railSide.createEl("button", { cls: "lubi-rail-link", attr: { "data-lubi-focus": "rail:backups" } });
@@ -125,6 +126,7 @@ export class DashboardView extends ItemView {
     const work = shell.createDiv({ cls: "lubi-workspace" });
 
     const bar = work.createDiv({ cls: "lubi-topbar" });
+    this.topbar = bar;
     const left = bar.createDiv({ cls: "lubi-topbar-left" });
     const nav = left.createDiv({ cls: "lubi-nav lubi-day-nav" });
     iconButton(nav, "chevron-left", "前一天（←）", () => this.setDate(shiftDate(this.date, -1)));
@@ -177,17 +179,44 @@ export class DashboardView extends ItemView {
   /** 侧栏与页签共用当前页面状态。 */
   private syncRail(): void {
     if (!this.railLinks) return;
+    const focusDay = this.tab === "tasks" && this.tasksState.scheduleView === "list" && this.tasksState.period === "day"
+      && this.tasksState.selectedDate === todayStr();
     for (const link of this.railLinks) {
       const focus = link.dataset.lubiFocus;
       const active = focus === "rail:today"
-        ? this.tab === "tasks" && this.date === todayStr() && this.tasksState.selectedDate === todayStr()
+        ? focusDay
         : focus === "rail:plan"
-          ? this.tab === "tasks" && !(this.date === todayStr() && this.tasksState.selectedDate === todayStr())
+          ? this.tab === "tasks" && !focusDay
           : focus === `rail:${this.tab}`;
       link.toggleClass("is-active", active);
       if (active) link.setAttribute("aria-current", "page");
       else link.removeAttribute("aria-current");
     }
+  }
+
+  /** 侧栏“今天”回到聚焦日视图，而不是只改日期。 */
+  private openToday(): void {
+    this.tasksState.scheduleView = "list";
+    this.tasksState.period = "day";
+    this.date = todayStr();
+    this.syncTasksDate(this.date);
+    this.tab = "tasks";
+    this.syncTabs();
+    void this.render();
+  }
+
+  /** 侧栏“计划”从聚焦日切到周计划；已在计划视图时保留当前范围。 */
+  private openPlan(): void {
+    const focusDay = this.tasksState.scheduleView === "list" && this.tasksState.period === "day"
+      && this.tasksState.selectedDate === todayStr();
+    if (focusDay) {
+      this.tasksState.scheduleView = "calendar";
+      this.tasksState.period = "week";
+    }
+    this.date = this.tasksState.selectedDate;
+    this.tab = "tasks";
+    this.syncTabs();
+    void this.render();
   }
 
   /** Ordinary creation is planning-only by default, on every page and schedule view. */
@@ -382,8 +411,28 @@ export class DashboardView extends ItemView {
     const planDetails = host.querySelector<HTMLDetailsElement>(".lubi-plan-task-details");
     if (planDetails) planDetails.open = key === this.lastRenderKey ? this.body.querySelector<HTMLDetailsElement>(".lubi-plan-task-details")?.open ?? true : true;
     const bodyScroll = this.body.scrollTop;
+    // Animate only real navigation (tab, schedule view, period or date), not
+    // routine data refreshes or the initial load.
+    if (this.lastRenderKey && key !== this.lastRenderKey) host.addClass("lubi-page-enter");
     this.body.empty();
     this.body.appendChild(host);
+    // The date, page tabs and actions belong to the page, not to a separate
+    // chrome strip. Move the existing control group below the page intro so all
+    // of its state, focus targets and menus stay intact.
+    if (this.topbar) {
+      this.topbar.remove();
+      const intro = host.querySelector<HTMLElement>(".lubi-plan-intro");
+      if (intro) intro.after(this.topbar);
+      else host.prepend(this.topbar);
+      // Keep one action cluster. On the task pages the page tools move into the
+      // toolbar's right side instead of stacking a second row above it.
+      const right = this.topbar.querySelector<HTMLElement>(".lubi-topbar-right");
+      right?.querySelectorAll(":scope > .lubi-context-tools").forEach(element => element.remove());
+      if (this.tab === "tasks") {
+        const tools = intro?.querySelector<HTMLElement>(":scope > .lubi-context-tools");
+        if (tools && right) right.prepend(tools);
+      }
+    }
     if (this.ganttObserved) this.panelObserver?.unobserve(this.ganttObserved);
     this.ganttObserved = host.querySelector<HTMLElement>(".lubi-gantt-table") || undefined;
     if (this.ganttObserved) this.panelObserver?.observe(this.ganttObserved);

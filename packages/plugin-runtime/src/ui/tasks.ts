@@ -186,7 +186,9 @@ function renderPlanningOverview(plugin: LubiPlugin, host: HTMLElement, date: str
   const intro = host.createDiv({ cls: "lubi-plan-intro" });
   const heading = intro.createDiv();
   heading.createEl("h1", { cls: "lubi-plan-heading", text: focusDay ? "今天" : "计划" });
-  heading.createDiv({ cls: "lubi-muted", text: focusDay ? "把注意力留在正在进行的事上" : `${shortDate(date)} 周${weekdayZh(date)} · 先安排，再行动` });
+  // The focused day already says “today” in the title and the topbar date.
+  // Keep the date/context line only for the planning range.
+  if (!focusDay) heading.createDiv({ cls: "lubi-muted", text: `${shortDate(date)} 周${weekdayZh(date)} · 先安排，再行动` });
   const tools = intro.createDiv({ cls: "lubi-context-tools", attr: { "aria-label": "执行与整理" } });
   button(tools, "计时", () => plugin.openProduct("timer"), { icon: "timer", cls: "lubi-btn-sm" });
   button(tools, "待整理", () => plugin.openProduct("backlog"), { icon: "inbox", cls: "lubi-btn-sm" });
@@ -200,6 +202,7 @@ function renderPlanningOverview(plugin: LubiPlugin, host: HTMLElement, date: str
   const pending = records.filter(record => record.minutes > 0 && record.extra[PENDING_KEY] && record.extra[PENDING_KEY] !== "实际开始未核对").length;
   const metric = (id: string, label: string, value: string, note: string) => {
     const item = overview.createDiv({ cls: "lubi-plan-metric", attr: { "data-plan-metric": id } });
+    item.toggleClass("is-zero", value === "0");
     item.createDiv({ cls: "lubi-plan-metric-label", text: label });
     item.createDiv({ cls: "lubi-plan-metric-value", text: value });
     item.setAttribute("aria-label", `${label} ${value}；${note}`);
@@ -233,7 +236,7 @@ function renderFocusTimer(plugin: LubiPlugin, host: HTMLElement, date: string, r
       if (!options.length) { body.createDiv({ cls: "lubi-muted", text: "先创建任务，再开始计时。" }); return; }
       const select = body.createEl("select", { cls: "lubi-focus-timer-pick", attr: { "aria-label": "选择计时任务" } });
       for (const task of options) select.createEl("option", { value: task.id, text: task.date ? `${task.title} · ${shortDate(task.date)}` : task.title });
-      const start = button(body, "开始计时", async () => {
+      const start = button(body, "开始", async () => {
         if (start.disabled) return;
         start.disabled = true;
         try {
@@ -311,7 +314,7 @@ function renderPersonalTime(plugin: LubiPlugin, host: HTMLElement, date: string,
   card.open = !available || timed.length > 0;
   const head = card.createEl("summary", { cls: "lubi-panel-head", attr: { "data-lubi-focus": "personal-time-details" } });
   head.createSpan({ cls: "lubi-panel-title", text: "我的用时" });
-  head.createSpan({ cls: "lubi-muted", text: !available ? "读取失败" : timed.length ? `${timed.length} 条 · ${date}` : "暂无记录" });
+  head.createSpan({ cls: "lubi-muted", text: !available ? "读取失败" : timed.length ? `${timed.length} 条` : "暂无记录" });
   head.createSpan({ cls: "lubi-disclosure-chevron", text: "›", attr: { "aria-hidden": "true" } });
   card.createDiv({ cls: "lubi-muted lubi-execution-note", text: "来自本人日记；待确认会单独标注，不包含后台时长。" });
   const list = card.createDiv({ cls: "lubi-personal-time-list" });
@@ -328,7 +331,12 @@ function renderPersonalTime(plugin: LubiPlugin, host: HTMLElement, date: string,
   if (!available) button(card, "重新读取用时", rerender, { cls: "lubi-btn-sm" });
   button(card, "记一笔用时", () => openNew({}), { cls: "lubi-personal-time-add" });
   const background = host.querySelector(".lubi-background-card");
-  if (background) background.after(card); else host.prepend(card);
+  if (background) background.after(card);
+  // The daily focus rail already contains the live timer. Keep that card first
+  // so the current timer is visible before the longer record list; other
+  // layouts still put personal time above their task list.
+  else if (host.classList.contains("lubi-focus-side")) host.append(card);
+  else host.prepend(card);
 }
 
 function renderPlanningHead(host: HTMLElement, state: TasksState, days: string[], rerender: () => void): HTMLElement {

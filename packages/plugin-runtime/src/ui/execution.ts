@@ -121,6 +121,7 @@ export function renderExecutionQueues(plugin: LubiPlugin, host: HTMLElement, rer
     const card = host.createEl("details", { cls: "lubi-section lubi-list-card lubi-background-card" });
     if (!host.classList.contains("lubi-card")) card.addClass("lubi-card");
     card.open = running.length > 0;
+    card.toggleClass("is-empty", running.length === 0);
     card.createEl("summary", { text: running.length ? `Agent 后台 · ${running.length}` : "Agent 后台 · 暂无运行", attr: { "aria-label": `后台运行 ${running.length} 项；仅手动标注，不计入本人实际用时` } });
     card.createDiv({ cls: "lubi-muted lubi-execution-note", text: "仅手动标注，不控制 Agent，不计入本人实际用时。" });
     const list = card.createDiv({ cls: "lubi-execution-list" });
