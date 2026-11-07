@@ -8,8 +8,8 @@
   "overrides": {
     "src/ui/tasks.ts": {
       "originalSha256": "c20dec3bd4eb038f55b594f2aad9f44046c4479b77c1128e6c7564ae636ca960",
-      "webSha256": "05bff6eea3b0076b30ed9418b45620b74331bf03c7d879d7c6b92425e656a57b",
-      "reason": "Compact summary, successfully-empty disclosures, purpose-based timer/backlog entries, explicit unknown journal state."
+      "webSha256": "27aa20dcf0ec1cec96e8c7d093bfa81f9be87b147a4e692c8dc7c1027e274d26",
+      "reason": "Compact summary, successfully-empty disclosures, purpose-based timer/backlog entries, explicit unknown journal state, focused workbench day layout with inline timer."
     },
     "src/ui/execution.ts": {
       "originalSha256": "69ad95972329ee82782e864cd58f5d7c1181aaea968cd2302e1048b7b9cb16d1",
@@ -23,8 +23,8 @@
     },
     "src/ui/view.ts": {
       "originalSha256": "63cca178e476995ba221a7347c138a409c35ba41dcff2be48a8fd2b8fcb6175e",
-      "webSha256": "4b07d0d1d1529908acccc895b4e94cfae8ea1a55935e86b460c37dee893c0a7b",
-      "reason": "Explicit actual-entry button, more-menu discovery, backup destination, loading/read-error visibility."
+      "webSha256": "fbba5ef647c2b0bf686cc10994f8b54267ec93cd61dfc82afa35b3d2c1029820",
+      "reason": "Explicit actual-entry button, more-menu discovery, backup destination, loading/read-error visibility, focused workbench side rail shell."
     },
     "src/ui/productivity.ts": {
       "originalSha256": "d02b7d0f027b1be6e4fe5c72a22135a90c90a51bca4bf83939d122b45c58693e",

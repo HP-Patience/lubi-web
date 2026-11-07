@@ -3,7 +3,7 @@
 import { ItemView, Menu, WorkspaceLeaf } from "obsidian";
 import type LubiPlugin from "../main";
 import { shiftDate, shortDate, todayStr, weekdayZh, weekStart } from "../core/time";
-import { iconButton, segmented, button, debounce, hideTip, tip } from "./components";
+import { iconButton, segmented, button, debounce, hideTip, tip, icon } from "./components";
 import { renderReview, ReviewState } from "./review";
 import { ganttWindow } from "../core/gantt";
 import { renderTasks, TasksState } from "./tasks";
@@ -24,6 +24,7 @@ export class DashboardView extends ItemView {
   review: ReviewState = { period: "week", anchor: todayStr(), display: "chart" };
   tasksState: TasksState = { selectedDate: todayStr(), scheduleView: "list", period: "day", ganttCollapsed: new Set() };
   private body!: HTMLElement;
+  private railLinks?: HTMLElement[];
   private dateLabel!: HTMLElement;
   private todayBtn!: HTMLButtonElement;
   private contextLabel!: HTMLElement;
@@ -80,7 +81,6 @@ export class DashboardView extends ItemView {
       this.panelObserver.observe(root);
     }
     this.buildHeader(root);
-    this.body = root.createDiv({ cls: "lubi-body" });
     await this.loadAndRender();
   }
 
@@ -99,8 +99,32 @@ export class DashboardView extends ItemView {
   }
 
   private buildHeader(root: HTMLElement): void {
-    // 三段式栅格：左 = 日期 / 周期上下文（永不留空）；中 = 两页切换（位置恒定）；右 = 主操作 + 更多
-    const bar = root.createDiv({ cls: "lubi-topbar" });
+    // 专注工作台外壳：侧栏导航 + 顶部日期 / 操作栏。页签与日期状态保持原行为。
+    const shell = root.createDiv({ cls: "lubi-shell" });
+    const rail = shell.createDiv({ cls: "lubi-rail", attr: { "aria-label": "主导航" } });
+    rail.createDiv({ cls: "lubi-rail-brand", text: "Lubi" });
+    const railNav = rail.createDiv({ cls: "lubi-rail-nav" });
+    const railButton = (label: string, iconName: string, focus: string, onClick: () => void) => {
+      const b = railNav.createEl("button", { cls: "lubi-rail-link", attr: { "data-lubi-focus": `rail:${focus}` } });
+      icon(b, iconName, "lubi-icon lubi-rail-icon");
+      b.createSpan({ text: label });
+      b.addEventListener("click", onClick);
+      return b;
+    };
+    tip(railButton("今天", "calendar-days", "today", () => { this.setDate(todayStr()); this.setTab("tasks"); }), "回到今天的计划（T）");
+    tip(railButton("计划", "calendar", "plan", () => this.setTab("tasks")), "计划视图（1）");
+    tip(railButton("回顾", "chart-column", "review", () => this.setTab("review")), "回顾视图（2）");
+    const railSide = rail.createDiv({ cls: "lubi-rail-side" });
+    const backup = railSide.createEl("button", { cls: "lubi-rail-link", attr: { "data-lubi-focus": "rail:backups" } });
+    icon(backup, "archive", "lubi-icon lubi-rail-icon");
+    backup.createSpan({ text: "设置与备份" });
+    backup.addEventListener("click", () => {
+      const host = this.app as unknown as { setting: { openTabById: (id: string) => void } };
+      host.setting.openTabById("lubi-backups");
+    });
+    const work = shell.createDiv({ cls: "lubi-workspace" });
+
+    const bar = work.createDiv({ cls: "lubi-topbar" });
     const left = bar.createDiv({ cls: "lubi-topbar-left" });
     const nav = left.createDiv({ cls: "lubi-nav lubi-day-nav" });
     iconButton(nav, "chevron-left", "前一天（←）", () => this.setDate(shiftDate(this.date, -1)));
@@ -140,10 +164,29 @@ export class DashboardView extends ItemView {
     cta.createSpan({ cls: "lubi-kbd lubi-kbd-cta", text: "N" });
     iconButton(right, "more-horizontal", "更多", () => undefined, "lubi-more-btn").addEventListener("click", (e) => this.openMore(e));
 
+    this.body = work.createDiv({ cls: "lubi-body" });
+    this.railLinks = Array.from(root.querySelectorAll<HTMLElement>(".lubi-rail-link[data-lubi-focus^='rail:']"));
+
     // 视图内快捷键（输入框、模态内不触发）
     if (!this.keyHandler) {
       this.keyHandler = (e: KeyboardEvent) => this.onKey(e);
       document.addEventListener("keydown", this.keyHandler);
+    }
+  }
+
+  /** 侧栏与页签共用当前页面状态。 */
+  private syncRail(): void {
+    if (!this.railLinks) return;
+    for (const link of this.railLinks) {
+      const focus = link.dataset.lubiFocus;
+      const active = focus === "rail:today"
+        ? this.tab === "tasks" && this.date === todayStr() && this.tasksState.selectedDate === todayStr()
+        : focus === "rail:plan"
+          ? this.tab === "tasks" && !(this.date === todayStr() && this.tasksState.selectedDate === todayStr())
+          : focus === `rail:${this.tab}`;
+      link.toggleClass("is-active", active);
+      if (active) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
     }
   }
 
@@ -236,6 +279,7 @@ export class DashboardView extends ItemView {
     this.contentEl.dataset.tab = this.tab;
     this.ctaLabel?.setText(this.ctaText());
     this.contentEl.querySelectorAll(".lubi-topbar-tabs .lubi-seg-item").forEach((b, i) => b.setAttribute("aria-pressed", String(["tasks", "review"][i] === this.tab)));
+    this.syncRail();
   }
 
   /** 外部跳转：可同时指定页与日期，不重建顶栏 */
@@ -273,6 +317,7 @@ export class DashboardView extends ItemView {
     const active = document.activeElement as HTMLElement | null;
     const focusKey = active && this.body.contains(active) ? active.getAttribute("data-lubi-focus") : null;
     hideTip();
+    this.syncRail();
     // 任务页内部（周日程翻周、点表头、议程）改了选中日：顶栏日期跟着它
     if (this.tab === "tasks") this.date = this.tasksState.selectedDate;
     const isToday = this.date === todayStr();

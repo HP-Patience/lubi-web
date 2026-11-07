@@ -96,20 +96,64 @@
   color: var(--color-ink);
 }
 
+/* 专注工作台外壳：左侧导航 + 顶部栏 + 内容区 */
+@container lubi (max-width: 560px) {
+  .lubi-root .lubi-topbar { display:grid; grid-template-columns:minmax(0,1fr); grid-auto-rows:min-content; gap:8px; padding:10px 12px; }
+  .lubi-root .lubi-topbar-left { grid-row:1; width:100%; flex-basis:auto; min-width:0; }
+  .lubi-root .lubi-day-nav { display:flex; width:100%; justify-content:space-between; gap:4px; min-width:0; }
+  .lubi-root .lubi-day-nav .lubi-icon-btn { flex:0 0 28px; width:28px; min-width:28px; }
+  .lubi-root .lubi-day-nav .lubi-date-label { flex:1 1 auto; min-width:0; max-width:none; padding:0 6px; font-size:13px; justify-content:center; }
+  .lubi-root .lubi-topbar-right { grid-row:2; width:100%; margin-left:0; justify-content:flex-end; }
+  .lubi-root .lubi-topbar-tabs { grid-row:3; display:flex; width:100%; justify-content:space-around; margin-left:0; }
+  .lubi-root .lubi-page { padding:16px 12px 28px; }
+}
+.lubi-root .lubi-shell { display:grid; grid-template-columns:184px minmax(0,1fr); height:100%; min-height:0; overflow:hidden; }
+.lubi-root .lubi-rail {
+  display:flex; flex-direction:column; gap:4px; padding:20px 12px 16px;
+  border-right:1px solid var(--color-border); background:var(--color-canvas);
+  overflow-y:auto;
+}
+.lubi-root .lubi-rail-brand {
+  padding:2px 12px 28px; font-family:Georgia,"Times New Roman",serif; font-size:24px;
+  font-weight:700; letter-spacing:-.05em; line-height:1;
+}
+.lubi-root .lubi-rail-nav,
+.lubi-root .lubi-rail-side { display:grid; gap:4px; }
+.lubi-root .lubi-rail-side { margin-top:auto; padding-top:16px; }
+.lubi-root .lubi-rail-link {
+  display:flex; align-items:center; gap:10px; width:100%; min-height:36px; padding:0 12px;
+  border:1px solid transparent; border-radius:8px; background:transparent; color:var(--color-muted);
+  font-size:13px; text-align:left; transition:background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+.lubi-root .lubi-rail-link:hover { background:var(--background-modifier-hover); color:var(--color-ink); }
+.lubi-root .lubi-rail-link.is-active {
+  background:#f2e9d6; border-color:#ecdfc6; color:var(--color-ink); font-weight:600;
+}
+.lubi-root .lubi-rail-icon { width:18px; height:18px; flex:0 0 18px; }
+.lubi-root .lubi-rail-icon svg { width:17px; height:17px; }
+.lubi-root .lubi-workspace { display:flex; flex-direction:column; min-width:0; min-height:0; overflow:hidden; }
+.lubi-root .lubi-body { min-height:0; flex:1; overflow:auto; }
+.lubi-root .lubi-rail:focus-visible,
+.lubi-root .lubi-rail-link:focus-visible { outline:var(--focus-width) solid var(--focus-color); outline-offset:-2px; }
+
 .lubi-root .lubi-topbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
   gap: 12px;
   padding: 14px 24px;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-canvas);
 }
+.lubi-root .lubi-topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 0 0 auto; }
 .lubi-root .lubi-topbar-tabs {
-  margin-left: 10px;
+  margin-left:10px;
 }
-.lubi-root .lubi-topbar-right { gap: 8px; }
+.lubi-root .lubi-topbar-right { gap:8px; }
 .lubi-root .lubi-date-label {
-  min-width: 176px;
-  color: var(--color-ink);
-  font-size: 15px;
+  min-width:176px;
+  color:var(--color-ink);
+  font-size:15px;
   box-shadow: none;
 }
 .lubi-root .lubi-date-label.is-today { color: var(--color-ink); }
@@ -143,6 +187,40 @@
 .lubi-root .lubi-plan-heading { font-size: 28px; letter-spacing: -.035em; }
 .lubi-root .lubi-plan-intro { margin-bottom: 20px; }
 .lubi-root .lubi-plan-intro .lubi-muted { color: var(--color-muted); }
+
+/* 专注工作台每日页：任务清单为主，右侧计时与当天投入为上下文 */
+.lubi-root .lubi-focus-layout { display:grid; grid-template-columns:minmax(0,1fr) 336px; gap:22px; align-items:start; }
+.lubi-root .lubi-focus-main,
+.lubi-root .lubi-focus-side { display:flex; flex-direction:column; gap:14px; min-width:0; }
+.lubi-root .lubi-focus-side { position:sticky; top:12px; }
+.lubi-root .lubi-focus-layout .lubi-list-card { margin:0; }
+.lubi-root .lubi-focus-main > .lubi-section + .lubi-section,
+.lubi-root .lubi-focus-side > .lubi-section + .lubi-section { margin-top:0; }
+
+.lubi-root .lubi-focus-timer .lubi-panel-title { font-size:15px; }
+.lubi-root .lubi-focus-timer.is-live { border-left:3px solid var(--lubi-accent); }
+.lubi-root .lubi-focus-timer-body { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+.lubi-root .lubi-focus-timer-task { font-size:15px; font-weight:600; overflow-wrap:anywhere; }
+.lubi-root .lubi-focus-timer-clock {
+  color:#ae7924; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:clamp(34px,3.6vw,48px); font-weight:600; line-height:1; letter-spacing:-.06em;
+  font-variant-numeric:tabular-nums;
+}
+.lubi-root .lubi-focus-timer-clock.is-long { color:#8a5a28; }
+.lubi-root .lubi-focus-timer-actions { display:flex; gap:8px; }
+.lubi-root .lubi-focus-timer-actions .lubi-btn { flex:1; min-width:0; height:34px; }
+.lubi-root .lubi-focus-timer-pick { width:100%; height:34px; }
+.lubi-root .lubi-focus-timer-start { width:100%; height:34px; }
+.lubi-root .lubi-focus-timer-preview { display:grid; gap:4px; font-size:12px; }
+.lubi-root .lubi-focus-timer-row { font-variant-numeric:tabular-nums; }
+.lubi-root .lubi-focus-timer-confirm { display:flex; align-items:center; gap:8px; font-size:12px; line-height:1.5; }
+.lubi-root .lubi-focus-timer-commit { height:34px; }
+.lubi-root .lubi-focus-timer-discard {
+  align-self:flex-start; margin-top:6px; padding:2px 0; border:0; background:transparent;
+  color:var(--color-muted); font-size:12px; text-decoration:underline; text-underline-offset:3px;
+}
+.lubi-root .lubi-focus-timer-discard:hover { color:var(--text-error); }
+.lubi-root .lubi-focus-timer .lubi-execution-note { margin:0; font-size:11px; line-height:1.6; }
 
 /* Replace competing panels with one calm surface and fine dividers. */
 .lubi-root .lubi-card,
@@ -204,9 +282,55 @@
 .lubi-root .lubi-review .lubi-chart-line,
 .lubi-root .lubi-review .lubi-chart-point { stroke: var(--lubi-accent); }
 
+@media (max-width: 1100px) {
+  .lubi-root .lubi-shell { grid-template-columns: 72px minmax(0, 1fr); }
+  .lubi-root .lubi-rail { padding: 16px 8px 12px; }
+  .lubi-root .lubi-rail-brand { padding: 2px 0 22px; text-align: center; font-size: 17px; letter-spacing: -.02em; }
+  .lubi-root .lubi-rail-link { justify-content: center; padding: 0; gap: 0; }
+  .lubi-root .lubi-rail-link > span:not(.lubi-icon) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .lubi-root .lubi-rail-link > .lubi-icon { position: static; }
+}
+@media (max-width: 1000px) {
+  .lubi-root .lubi-focus-layout { grid-template-columns: minmax(0, 1fr); }
+  .lubi-root .lubi-focus-side { position: static; }
+}
 @media (max-width: 900px) {
   .lubi-root .lubi-page { padding: 20px 16px 36px; }
   .lubi-root .lubi-topbar { padding: 12px 16px; }
+  .lubi-root .lubi-topbar-tabs { flex-shrink: 0; }
+}
+@media (max-width: 700px) {
+  .lubi-root .lubi-shell { grid-template-columns: 56px minmax(0, 1fr); }
+  .lubi-root .lubi-rail { padding: 12px 6px 10px; }
+  .lubi-root .lubi-rail-brand { font-size: 14px; padding-bottom: 16px; }
+  .lubi-root .lubi-rail-link { min-height: 40px; }
+  .lubi-root .lubi-workspace { min-width: 0; }
+  .lubi-root .lubi-topbar {
+    display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-rows: min-content;
+    gap: 8px; padding: 10px 12px;
+  }
+  .lubi-root .lubi-topbar-left { grid-row: 1; min-width: 0; width: 100%; }
+  .lubi-root .lubi-topbar-left .lubi-day-nav { display: flex; align-items: center; justify-content: space-between; gap: 4px; width: 100%; }
+  .lubi-root .lubi-topbar-left .lubi-icon-btn { width: 28px; min-width: 28px; height: 30px; flex: 0 0 28px; }
+  .lubi-root .lubi-topbar-left button.lubi-date-label.lubi-date-label {
+    flex: 1 1 auto; min-width: 0; width: auto; max-width: none; height: 30px; padding: 0 4px;
+    font-size: 13px; font-variant-numeric: tabular-nums; justify-content: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .lubi-root .lubi-topbar-left button.lubi-date-label .lubi-today-badge { display: none; }
+  .lubi-root .lubi-topbar-left .lubi-today-badge,
+  .lubi-root .lubi-topbar-left .lubi-context { display: none; }
+  .lubi-root .lubi-topbar-left .lubi-today-btn { display: none; }
+  .lubi-root .lubi-topbar-right { grid-row: 2; width: 100%; margin-left: 0; gap: 8px; }
+  .lubi-root .lubi-topbar-right .lubi-btn { flex: 1; height: 32px; justify-content: center; }
+  .lubi-root .lubi-topbar-right .lubi-more-btn { flex: 0 0 32px; width: 32px; }
+  .lubi-root .lubi-kbd-cta { display: none; }
+  .lubi-root .lubi-topbar-tabs { grid-row: 3; width: 100%; margin-left: 0; }
+  .lubi-root .lubi-topbar-tabs .lubi-seg-item { flex: 1; justify-content: center; }
+  .lubi-root .lubi-plan-intro { flex-wrap: wrap; gap: 10px; }
+  .lubi-root .lubi-plan-heading { font-size: 26px; }
+  .lubi-root .lubi-focus-timer-clock { font-size: 40px; }
+  .lubi-root .lubi-overview-compact .lubi-plan-metric-value { font-size: 18px; }
 }
 
 .lubi-root .lubi-background-card > summary { font-size:13px; min-height:20px; }
@@ -216,3 +340,15 @@
 /* Honor renderer-owned collapsed state. Upstream flex layouts override the UA hidden rule. */
 .lubi-task-modal .lubi-extra-field[hidden],
 .lubi-task-modal .lubi-project-create[hidden] { display:none !important; }
+
+/* narrow shell header final override */
+@container lubi (max-width: 620px) {
+  .lubi-root .lubi-topbar { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; grid-auto-rows: min-content; gap: 8px !important; padding: 10px 12px !important; }
+  .lubi-root .lubi-topbar-left { grid-column: 1 !important; grid-row: 1 !important; width: 100%; min-width: 0; flex-basis: auto; }
+  .lubi-root .lubi-day-nav { display: flex; width: 100%; justify-content: space-between; gap: 4px; min-width: 0; }
+  .lubi-root .lubi-day-nav .lubi-icon-btn { flex: 0 0 28px; width: 28px; min-width: 28px; }
+  .lubi-root .lubi-day-nav .lubi-date-label { flex: 1 1 auto; min-width: 0; max-width: none; padding: 0 6px; font-size: 13px; }
+  .lubi-root .lubi-topbar-right { grid-column: 1 !important; grid-row: 2 !important; width: 100%; margin-left: 0; justify-content: flex-end; }
+  .lubi-root .lubi-topbar-tabs { grid-column: 1 !important; grid-row: 3 !important; display: flex; width: 100%; margin-left: 0; }
+}
+

@@ -17,6 +17,7 @@ import { renderMonthCalendar, renderRangeList } from "./planningViews";
 import { renderCalendarDay } from "./calendarDay";
 import { renderDayPlan } from "./daySummary";
 import { ParsedLine, PENDING_KEY, Rec } from "../core/records";
+import { timerElapsed, timerRecords } from "../core/productivity";
 import { renderExecutionQueues } from "./execution";
 import { backgroundEntries } from "../core/execution";
 
@@ -129,14 +130,23 @@ export async function renderTasks(plugin: LubiPlugin, host: HTMLElement, date: s
     bindDrop(plugin, day.querySelector<HTMLElement>(".lubi-tl-canvas")!, date, 0, rerender);
     return;
   }
+  const dayList = state.scheduleView === "list" && state.period === "day";
+  if (dayList) {
+    // 专注工作台每日页：左侧任务清单承担主视觉重量，右侧是当前计时与当天投入。
+    const layout = host.createDiv({ cls: "lubi-focus-layout" });
+    const main = layout.createDiv({ cls: "lubi-focus-main lubi-large" });
+    const side = layout.createDiv({ cls: "lubi-focus-side lubi-large" });
+    renderLists(plugin, main, date, rerender, openNew, edit, create, true, undefined, main, main);
+    renderFocusTimer(plugin, side, date, rerender);
+    renderPersonalTime(plugin, side, date, rows, timeAvailable, rerender, openNew);
+    return;
+  }
   const top = host.createDiv({ cls: "lubi-tasks-top lubi-planning-top" });
   const lists = top.createDiv({ cls: "lubi-tasks-left lubi-task-lists" });
   const main = top.createDiv({ cls: "lubi-tasks-week lubi-planning-main" });
   top.appendChild(lists);
-  const dayList = state.scheduleView === "list" && state.period === "day";
-  renderLists(plugin, lists, date, rerender, openNew, edit, create, true, undefined, main, dayList ? main : lists);
+  renderLists(plugin, lists, date, rerender, openNew, edit, create, true, undefined, main, lists);
   renderPersonalTime(plugin, lists, date, rows, timeAvailable, rerender, openNew);
-  if (dayList) return;
   const card = main.createDiv({ cls: `lubi-card ${state.scheduleView === "gantt" ? "lubi-gantt-card" : state.scheduleView === "list" ? "lubi-plan-list-card" : state.period === "month" ? "lubi-month-card" : "lubi-week-card"}` });
   const save = (id: string, patch: Partial<ScheduleFields>, message: string) => updateScheduleWithUndo(plugin, id, patch, message, rerender);
   const drop = (target: HTMLElement, day: string) => bindDrop(plugin, target, day, null, rerender, true, () => {
@@ -152,10 +162,11 @@ export async function renderTasks(plugin: LubiPlugin, host: HTMLElement, date: s
 
 /** Read-only page metrics; background clocks never become journal minutes. */
 function renderPlanningOverview(plugin: LubiPlugin, host: HTMLElement, date: string, records: Rec[], timeAvailable: boolean): void {
+  const focusDay = date === todayStr();
   const intro = host.createDiv({ cls: "lubi-plan-intro" });
   const heading = intro.createDiv();
-  heading.createEl("h1", { cls: "lubi-plan-heading", text: "任务与计划" });
-  heading.createDiv({ cls: "lubi-muted", text: "先安排，再行动。预计、用时和完成分别保存。" });
+  heading.createEl("h1", { cls: "lubi-plan-heading", text: focusDay ? "今天" : "任务与计划" });
+  heading.createDiv({ cls: "lubi-muted", text: focusDay ? "把注意力留在正在进行的事上" : "先安排，再行动。预计、用时和完成分别保存。" });
   const tools = intro.createDiv({ cls: "lubi-context-tools", attr: { "aria-label": "执行与整理" } });
   button(tools, "计时", () => plugin.openProduct("timer"), { icon: "timer", cls: "lubi-btn-sm" });
   button(tools, "待整理", () => plugin.openProduct("backlog"), { icon: "inbox", cls: "lubi-btn-sm" });
@@ -180,6 +191,96 @@ function renderPlanningOverview(plugin: LubiPlugin, host: HTMLElement, date: str
   metric("actual", "本人已记录", timeAvailable ? fmtDuration(minutes) : "暂不可读", !timeAvailable ? "用时暂不可读，未按 0 计算" : pending ? `${pending} 条按计划待确认未计入` : "本人记录之和，不是后台运行时间");
   if (timeAvailable && pending) overview.createDiv({ cls: "lubi-overview-notice", attr: { role: "status" }, text: `${pending} 条按计划待确认，尚未计入本人已记录。` });
   if (!timeAvailable) overview.createDiv({ cls: "lubi-overview-notice", attr: { role: "alert" }, text: "用时读取失败，未按 0 计算。任务与后台队列仍可查看。" });
+}
+
+/** 每日页右侧：把实时计时从弹窗提到页面内，新增前必须核对预览。 */
+function renderFocusTimer(plugin: LubiPlugin, host: HTMLElement, date: string, rerender: () => void): void {
+  const card = host.createDiv({ cls: "lubi-card lubi-section lubi-focus-timer" });
+  const head = card.createDiv({ cls: "lubi-panel-head" });
+  el(head, "h3", "lubi-panel-title", "当前计时");
+  const note = card.createDiv({ cls: "lubi-muted lubi-execution-note" });
+  let timer: number | undefined;
+  const stopClock = () => { if (timer !== undefined) window.clearInterval(timer); timer = undefined; };
+  const draw = () => {
+    stopClock();
+    card.querySelector(".lubi-focus-timer-body")?.remove();
+    const body = card.createDiv({ cls: "lubi-focus-timer-body" });
+    const session = plugin.settings.focusTimer;
+    if (!session) {
+      head.removeClass("is-live");
+      note.setText("还没有计时。开始后会记录本人投入，不自动完成任务。");
+      const options = plugin.tasks.all.filter(task => task.status !== "done").sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999") || a.order - b.order).slice(0, 60);
+      if (!options.length) { body.createDiv({ cls: "lubi-muted", text: "先创建任务，再开始计时。" }); return; }
+      const select = body.createEl("select", { cls: "lubi-focus-timer-pick", attr: { "aria-label": "选择计时任务" } });
+      for (const task of options) select.createEl("option", { value: task.id, text: task.date ? `${task.title} · ${shortDate(task.date)}` : task.title });
+      const start = button(body, "开始计时", async () => {
+        if (start.disabled) return;
+        start.disabled = true;
+        try {
+          const task = plugin.tasks.byId(select.value);
+          if (!task) throw new Error("任务已不存在");
+          await plugin.product.startTimer(task);
+          new Notice(`已开始计时「${task.title}」，任务状态未改变`);
+          rerender();
+        } catch (error) { new Notice(`未开始计时：${(error as Error).message}`, 6000); start.disabled = false; }
+      }, { cls: "lubi-focus-timer-start" });
+      return;
+    }
+    head.addClass("is-live");
+    note.setText(session.runningSince === undefined ? "已暂停；继续后会接续同一次计时。" : "计时中；离开页面不会自动暂停，结束前必须核对。");
+    body.createDiv({ cls: "lubi-focus-timer-task", text: session.title });
+    const clock = body.createDiv({ cls: "lubi-focus-timer-clock", attr: { role: "timer", "aria-live": "off" } });
+    const tick = () => {
+      const ms = timerElapsed(plugin.settings.focusTimer || session);
+      const minutes = Math.floor(ms / 60000), seconds = Math.floor(ms % 60000 / 1000);
+      clock.setText(`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
+      clock.toggleClass("is-long", ms > 8 * 3600000);
+    };
+    tick();
+    timer = window.setInterval(tick, 1000);
+    const actions = body.createDiv({ cls: "lubi-focus-timer-actions" });
+    const toggle = button(actions, session.runningSince === undefined ? "继续" : "暂停", async () => {
+      if (toggle.disabled) return;
+      toggle.disabled = true;
+      try { await plugin.product.toggleTimer(); rerender(); }
+      catch (error) { new Notice(`计时未更新：${(error as Error).message}`, 6000); toggle.disabled = false; }
+    }, { cls: "lubi-focus-timer-toggle" });
+    if (session.runningSince !== undefined) {
+      button(actions, "结束并记入", async () => {
+        try { await plugin.product.toggleTimer(); rerender(); }
+        catch (error) { new Notice(`未能暂停：${(error as Error).message}`, 6000); }
+      }, { cls: "lubi-focus-timer-finish", primary: true });
+      return;
+    }
+    const rows = timerRecords(session);
+    const pending = body.createDiv({ cls: "lubi-focus-timer-preview" });
+    pending.createDiv({ cls: "lubi-muted", text: "预览：暂停空隙不计入，每段不足一分钟的尾数舍去。" });
+    if (!rows.length) pending.createDiv({ cls: "lubi-muted", text: "目前没有完整分钟；继续计时或放弃会话。" });
+    for (const row of rows) pending.createDiv({ cls: "lubi-focus-timer-row", text: `${shortDate(row.date)} ${row.start} · ${fmtDuration(row.minutes)}` });
+    const confirm = pending.createEl("label", { cls: "lubi-focus-timer-confirm" });
+    const check = confirm.createEl("input", { type: "checkbox" });
+    confirm.append(document.createTextNode("我已核对以上各段为真实本人投入"));
+    const commit = button(body, "确认保存实际记录", async () => {
+      if (commit.disabled) return;
+      if (!check.checked) { new Notice("请先核对并勾选确认", 6000); return; }
+      commit.disabled = true;
+      try { await plugin.product.commitTimer(session.id); new Notice("已保存实际用时，任务状态未改变"); rerender(); }
+      catch (error) { new Notice(`未保存：${(error as Error).message}`, 7000); commit.disabled = false; }
+    }, { cls: "lubi-focus-timer-commit", primary: true });
+    const discard = card.createEl("button", { cls: "lubi-focus-timer-discard", text: "放弃这次计时" });
+    discard.addEventListener("click", () => {
+      if (discard.dataset.armed !== "1") {
+        discard.dataset.armed = "1";
+        discard.setText("再次点击确认放弃；不删除已保存记录");
+        window.setTimeout(() => { if (discard.isConnected) { delete discard.dataset.armed; discard.setText("放弃这次计时"); } }, 5000);
+        return;
+      }
+      void plugin.product.discardTimer().then(() => { new Notice("已放弃本次计时会话"); rerender(); }).catch((error: unknown) => new Notice(`未能放弃：${(error as Error).message}`, 6000));
+    });
+  };
+  draw();
+  const observer = new MutationObserver(() => { if (!card.isConnected) { stopClock(); observer.disconnect(); } });
+  observer.observe(card.parentElement ?? card, { childList: true });
 }
 
 /** A small journal-backed sidebar, with the existing record editor for multi-segment safety. */
