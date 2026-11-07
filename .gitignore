@@ -18,3 +18,14 @@ packages/plugin-runtime/styles.css
 
 /backups/
 *.key
+
+# Local design/UI review process output (screenshots, snapshots).
+.oil-ui/**/*.png
+.draw-ui/
+assets/imagegen/
+
+.oil-ui/*.live.png
+.oil-ui/*
+!.oil-ui/focus-workbench-polish/design.md
+!.oil-ui/unslop-polish/audit.md
+
