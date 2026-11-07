@@ -222,6 +222,32 @@
 .lubi-root .lubi-focus-timer-discard:hover { color:var(--text-error); }
 .lubi-root .lubi-focus-timer .lubi-execution-note { margin:0; font-size:11px; line-height:1.6; }
 
+/* 专注工作台计划页：排期区域为主，当天任务与未安排为辅助栏 */
+.lubi-root .lubi-focus-plan-layout { display:grid; grid-template-columns:minmax(0,1fr) 268px; gap:18px; align-items:start; }
+.lubi-root .lubi-focus-plan-layout.is-gantt { grid-template-columns:minmax(0,1fr) 268px; }
+.lubi-root .lubi-plan-stage,
+.lubi-root .lubi-plan-aside { display:flex; flex-direction:column; gap:14px; min-width:0; }
+.lubi-root .lubi-plan-aside .lubi-card,
+.lubi-root .lubi-plan-aside .lubi-personal-time { padding:16px 18px; }
+.lubi-root .lubi-plan-stage > .lubi-card { margin:0; border-radius:8px; }
+.lubi-root .lubi-plan-stage .lubi-week-card,
+.lubi-root .lubi-plan-stage .lubi-gantt-card,
+.lubi-root .lubi-plan-stage .lubi-month-card { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.lubi-root .lubi-plan-stage .lubi-week-card { min-width:0; }
+.lubi-root .lubi-plan-stage .lubi-week { min-width:640px; }
+.lubi-root .lubi-plan-stage .lubi-week.is-single-day { min-width:0; }
+.lubi-root .lubi-plan-stage .lubi-gantt-scroll { overflow-x:auto; }
+.lubi-root .lubi-plan-aside { position:sticky; top:12px; }
+.lubi-root .lubi-planning-head { margin-bottom:2px; }
+.lubi-root .lubi-planning-nav { box-shadow:none; }
+.lubi-root .lubi-week-day.is-today { background:rgba(201,150,62,.05); }
+.lubi-root .lubi-week-col.is-today { background:rgba(201,150,62,.035); }
+.lubi-root .lubi-week-day.is-selected { background:rgba(201,150,62,.09); }
+.lubi-root .lubi-week-day-button { border-radius:6px; }
+.lubi-root .lubi-wblock { border-radius:5px; }
+.lubi-root .lubi-wblock.is-done { opacity:.62; }
+.lubi-root .lubi-overview-compact { margin-bottom:16px; }
+
 /* Replace competing panels with one calm surface and fine dividers. */
 .lubi-root .lubi-card,
 .lubi-root .lubi-timeline-scroll,
@@ -293,6 +319,26 @@
 @media (max-width: 1000px) {
   .lubi-root .lubi-focus-layout { grid-template-columns: minmax(0, 1fr); }
   .lubi-root .lubi-focus-side { position: static; }
+  .lubi-root .lubi-focus-plan-layout,
+  .lubi-root .lubi-focus-plan-layout.is-gantt { display:flex; flex-direction:column; gap:16px; }
+  .lubi-root .lubi-plan-aside { order: 2; width:100%; position:static; }
+  .lubi-root .lubi-plan-stage { order: 1; width:100%; }
+}
+@container lubi (max-width: 760px) {
+  .lubi-root .lubi-focus-plan-layout,
+  .lubi-root .lubi-focus-plan-layout.is-gantt { display:flex; flex-direction:column; gap:16px; }
+  .lubi-root .lubi-plan-stage,
+  .lubi-root .lubi-plan-aside { width:100%; min-width:0; }
+  .lubi-root .lubi-plan-aside { order:2; position:static; }
+  .lubi-root .lubi-plan-stage { order:1; }
+  .lubi-root .lubi-plan-stage .lubi-week-card {
+    width:100%; padding-top:8px;
+    -webkit-mask-image:linear-gradient(to right,#000 88%,transparent 100%);
+    mask-image:linear-gradient(to right,#000 88%,transparent 100%);
+  }
+  .lubi-root .lubi-plan-stage .lubi-week-card::after {
+    content:"左右滑动查看整周"; display:block; padding:0 12px 8px; color:var(--color-muted); font-size:11px;
+  }
 }
 @media (max-width: 900px) {
   .lubi-root .lubi-page { padding: 20px 16px 36px; }

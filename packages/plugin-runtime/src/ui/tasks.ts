@@ -100,7 +100,7 @@ export async function renderTasks(plugin: LubiPlugin, host: HTMLElement, date: s
   let rows: ParsedLine[] = [], timeAvailable = true;
   // Verify the selected day against storage; a failed read must not look like an empty cache.
   try { rows = await plugin.journal.read(date, true); } catch { timeAvailable = false; }
-  renderPlanningOverview(plugin, host, date, rows.map(row => row.rec), timeAvailable);
+  renderPlanningOverview(plugin, host, date, rows.map(row => row.rec), timeAvailable, state);
   const days = ganttWindow(state.selectedDate, state.period);
   const head = renderPlanningHead(host, state, days, rerender);
   if (calendarDay && !timeAvailable) {
@@ -141,9 +141,29 @@ export async function renderTasks(plugin: LubiPlugin, host: HTMLElement, date: s
     renderPersonalTime(plugin, side, date, rows, timeAvailable, rerender, openNew);
     return;
   }
-  const top = host.createDiv({ cls: "lubi-tasks-top lubi-planning-top" });
+  const wholeWeek = state.period === "week" || state.period === "month";
+  if (wholeWeek && state.scheduleView !== "list") {
+    // 专注工作台计划页：排期区域占主位，当天任务与未安排作为辅助栏。
+    const layout = host.createDiv({ cls: `lubi-focus-plan-layout is-${state.scheduleView}` });
+    const stage = layout.createDiv({ cls: "lubi-plan-stage lubi-large" });
+    const aside = layout.createDiv({ cls: "lubi-plan-aside lubi-large" });
+    const lists = aside.createDiv({ cls: "lubi-tasks-left lubi-task-lists" });
+    renderLists(plugin, lists, date, rerender, openNew, edit, create, true, undefined, stage, lists);
+    renderPersonalTime(plugin, lists, date, rows, timeAvailable, rerender, openNew);
+    const card = stage.createDiv({ cls: `lubi-card ${state.scheduleView === "gantt" ? "lubi-gantt-card" : state.period === "month" ? "lubi-month-card" : "lubi-week-card"}` });
+    const save = (id: string, patch: Partial<ScheduleFields>, message: string) => updateScheduleWithUndo(plugin, id, patch, message, rerender);
+    const drop = (target: HTMLElement, day: string) => bindDrop(plugin, target, day, null, rerender, true, () => {
+      if (state.scheduleView === "calendar" && state.period === "month" && day.slice(0, 7) !== date.slice(0, 7)) plugin.openDate(day, "tasks");
+    });
+    if (state.scheduleView === "gantt") {
+      renderGantt(plugin, card, days, state.ganttCollapsed, rerender, edit, save);
+    } else if (state.period === "month") renderMonthCalendar(plugin, card, date, edit, makeDraggable, drop);
+    else renderCalendarSchedule(plugin, card, date, state, rerender, edit);
+    return;
+  }
+  const top = host.createDiv({ cls: "lubi-tasks-top lubi-planning-top lubi-focus-plan" });
   const lists = top.createDiv({ cls: "lubi-tasks-left lubi-task-lists" });
-  const main = top.createDiv({ cls: "lubi-tasks-week lubi-planning-main" });
+  const main = top.createDiv({ cls: "lubi-tasks-week lubi-planning-main lubi-plan-stage" });
   top.appendChild(lists);
   renderLists(plugin, lists, date, rerender, openNew, edit, create, true, undefined, main, lists);
   renderPersonalTime(plugin, lists, date, rows, timeAvailable, rerender, openNew);
@@ -161,12 +181,12 @@ export async function renderTasks(plugin: LubiPlugin, host: HTMLElement, date: s
 }
 
 /** Read-only page metrics; background clocks never become journal minutes. */
-function renderPlanningOverview(plugin: LubiPlugin, host: HTMLElement, date: string, records: Rec[], timeAvailable: boolean): void {
-  const focusDay = date === todayStr();
+function renderPlanningOverview(plugin: LubiPlugin, host: HTMLElement, date: string, records: Rec[], timeAvailable: boolean, state: TasksState): void {
+  const focusDay = date === todayStr() && state.scheduleView === "list" && state.period === "day";
   const intro = host.createDiv({ cls: "lubi-plan-intro" });
   const heading = intro.createDiv();
-  heading.createEl("h1", { cls: "lubi-plan-heading", text: focusDay ? "今天" : "任务与计划" });
-  heading.createDiv({ cls: "lubi-muted", text: focusDay ? "把注意力留在正在进行的事上" : "先安排，再行动。预计、用时和完成分别保存。" });
+  heading.createEl("h1", { cls: "lubi-plan-heading", text: focusDay ? "今天" : "计划" });
+  heading.createDiv({ cls: "lubi-muted", text: focusDay ? "把注意力留在正在进行的事上" : `${shortDate(date)} 周${weekdayZh(date)} · 先安排，再行动` });
   const tools = intro.createDiv({ cls: "lubi-context-tools", attr: { "aria-label": "执行与整理" } });
   button(tools, "计时", () => plugin.openProduct("timer"), { icon: "timer", cls: "lubi-btn-sm" });
   button(tools, "待整理", () => plugin.openProduct("backlog"), { icon: "inbox", cls: "lubi-btn-sm" });

@@ -8,8 +8,8 @@
   "overrides": {
     "src/ui/tasks.ts": {
       "originalSha256": "c20dec3bd4eb038f55b594f2aad9f44046c4479b77c1128e6c7564ae636ca960",
-      "webSha256": "27aa20dcf0ec1cec96e8c7d093bfa81f9be87b147a4e692c8dc7c1027e274d26",
-      "reason": "Compact summary, successfully-empty disclosures, purpose-based timer/backlog entries, explicit unknown journal state, focused workbench day layout with inline timer."
+      "webSha256": "570c0418bb99861414289419842aabc13c341834284d00b32dd3950edfb2998f",
+      "reason": "Compact summary, successfully-empty disclosures, purpose-based timer/backlog entries, explicit unknown journal state, focused workbench day layout with inline timer, focused planning stage with side list column."
     },
     "src/ui/execution.ts": {
       "originalSha256": "69ad95972329ee82782e864cd58f5d7c1181aaea968cd2302e1048b7b9cb16d1",
