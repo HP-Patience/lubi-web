@@ -18,8 +18,8 @@
     },
     "src/ui/review.ts": {
       "originalSha256": "9299f83a1b4d0acf5f61344ee1736ada637ba4a96e20fde47fd929b35c28a4db",
-      "webSha256": "80a600d82d595f6eab36a9d01f278c6468c6612b18b6ade37aad9968c98a4e6d",
-      "reason": "Place cost/outcome and weekly review beside review content; calculations unchanged."
+      "webSha256": "0a47432f59350e0f5cb8e2a031751187ad9a9d40469432f921e2263281f3d009",
+      "reason": "Place cost/outcome and weekly review beside review content; calculations unchanged; focused workbench review board with primary headline and trend stage."
     },
     "src/ui/view.ts": {
       "originalSha256": "63cca178e476995ba221a7347c138a409c35ba41dcff2be48a8fd2b8fcb6175e",

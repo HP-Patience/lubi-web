@@ -248,6 +248,41 @@
 .lubi-root .lubi-wblock.is-done { opacity:.62; }
 .lubi-root .lubi-overview-compact { margin-bottom:16px; }
 
+/* 专注工作台回顾页：一个主数字、一张主趋势图，其余退为辅助 */
+.lubi-root .lubi-review-board { display:grid; grid-template-columns:minmax(0,1fr) 300px; grid-template-areas:"headline headline" "trend extras" "trend insights"; gap:16px 18px; align-items:start; }
+.lubi-root .lubi-review-headline { grid-area:headline; }
+.lubi-root .lubi-review-trend { grid-area:trend; }
+.lubi-root .lubi-review-extras { grid-area:extras; }
+.lubi-root .lubi-review-board .lubi-review-insights { grid-area:insights; }
+.lubi-root .lubi-review-headline {
+  display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:12px 28px;
+  padding:20px 22px; background:var(--color-surface);
+}
+.lubi-root .lubi-review-headline .lubi-kpi.is-primary { border:0; padding:0; background:transparent; }
+.lubi-root .lubi-review-headline .lubi-kpi.is-primary .lubi-kpi-label { margin-bottom:6px; }
+.lubi-root .lubi-review-headline .lubi-kpi.is-primary .lubi-kpi-value {
+  font-family:Georgia,"Songti SC",serif; font-size:clamp(30px,3vw,40px); font-weight:600; line-height:1.05; letter-spacing:-.03em;
+}
+.lubi-root .lubi-review-headline .lubi-kpi-grid {
+  display:flex; flex-wrap:wrap; gap:8px 22px; justify-content:flex-end; margin:0;
+}
+.lubi-root .lubi-review-headline .lubi-kpi-grid .lubi-kpi {
+  border:0; padding:0; background:transparent; min-width:0; text-align:right;
+}
+.lubi-root .lubi-review-headline .lubi-kpi-grid .lubi-kpi-label { font-size:11px; }
+.lubi-root .lubi-review-headline .lubi-kpi-grid .lubi-kpi-value { font-size:16px; margin:2px 0 0; }
+.lubi-root .lubi-review-trend { padding:20px 22px 16px; }
+.lubi-root .lubi-review-trend .lubi-chart-legend { flex-wrap:wrap; gap:6px 12px; }
+.lubi-root .lubi-review-extras { padding:16px 18px; }
+.lubi-root .lubi-review-extras .lubi-review-grid { grid-template-columns:minmax(0,1fr); gap:16px; }
+.lubi-root .lubi-review-extras .lubi-section + .lubi-section { margin-top:14px; }
+.lubi-root .lubi-review-board .lubi-review-insights { border:1px solid var(--color-border); border-radius:8px; background:var(--color-surface); padding:14px 18px; }
+.lubi-root .lubi-review-board .lubi-review-insights > summary { cursor:pointer; font-size:13px; color:var(--color-muted); }
+.lubi-root .lubi-review .lubi-toolbar { margin-bottom:16px; }
+.lubi-root .lubi-review .lubi-kpi-delta { font-size:12px; }
+.lubi-root .lubi-review .lubi-data-warning { margin-bottom:14px; }
+.lubi-root .lubi-review .lubi-heat-card { margin-top:16px; }
+
 /* Replace competing panels with one calm surface and fine dividers. */
 .lubi-root .lubi-card,
 .lubi-root .lubi-timeline-scroll,
@@ -323,6 +358,10 @@
   .lubi-root .lubi-focus-plan-layout.is-gantt { display:flex; flex-direction:column; gap:16px; }
   .lubi-root .lubi-plan-aside { order: 2; width:100%; position:static; }
   .lubi-root .lubi-plan-stage { order: 1; width:100%; }
+  .lubi-root .lubi-review-board { grid-template-columns:minmax(0,1fr); grid-template-areas:"headline" "trend" "extras" "insights"; }
+  .lubi-root .lubi-review-headline { grid-template-columns:minmax(0,1fr); align-items:start; }
+  .lubi-root .lubi-review-headline .lubi-kpi-grid { justify-content:flex-start; }
+  .lubi-root .lubi-review-headline .lubi-kpi-grid .lubi-kpi { text-align:left; }
 }
 @container lubi (max-width: 760px) {
   .lubi-root .lubi-focus-plan-layout,
@@ -397,3 +436,9 @@
   .lubi-root .lubi-topbar-right { grid-column: 1 !important; grid-row: 2 !important; width: 100%; margin-left: 0; justify-content: flex-end; }
   .lubi-root .lubi-topbar-tabs { grid-column: 1 !important; grid-row: 3 !important; display: flex; width: 100%; margin-left: 0; }
 }
+
+/* 回顾页保留主要操作，并限制空数据时图表高度 */
+.lubi-root[data-tab="review"] .lubi-topbar .lubi-topbar-cta { display: inline-flex !important; }
+.lubi-root .lubi-review-trend .lubi-chart { max-height: 340px; }
+.lubi-root .lubi-review-trend .lubi-bars { min-height: 0; }
+.lubi-root .lubi-review-empty-note { font-size: 12px; }

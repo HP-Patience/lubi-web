@@ -29,7 +29,7 @@ export async function renderReview(plugin: LubiPlugin, host: HTMLElement, state:
   const { from, to, label, buckets } = range(state);
   const intro = host.createDiv({ cls: "lubi-plan-intro" });
   const heading = intro.createDiv();
-  heading.createEl("h1", { cls: "lubi-plan-heading", text: "回顾与成果" });
+  heading.createEl("h1", { cls: "lubi-plan-heading", text: "回顾" });
   heading.createDiv({ cls: "lubi-muted", text: "看看真实投入，再决定下一步。" });
   const tools = intro.createDiv({ cls: "lubi-context-tools", attr: { "aria-label": "复盘工具" } });
   button(tools, "投入与成果", () => plugin.openProduct("cost"), { cls: "lubi-btn-sm" });
@@ -74,7 +74,9 @@ export async function renderReview(plugin: LubiPlugin, host: HTMLElement, state:
   // 一组摘要展示核心指标，不再为每个数字单独建卡。
   const daysLogged = new Set(timed.map((r) => r.date)).size;
   const spend = all.filter((r) => r.amount !== undefined && !isNaN(r.amount));
-  const kpis = host.createDiv({ cls: "lubi-card lubi-kpis lubi-kpis-v2" });
+  // 专注工作台回顾页：一个主数字、一张主趋势图，其余指标退到辅助栏。
+  const board = host.createDiv({ cls: "lubi-review-board" });
+  const kpis = board.createDiv({ cls: "lubi-card lubi-kpis lubi-kpis-v2 lubi-review-headline" });
   const primary = kpi(kpis, "记录总时长", fmtHours(total), undefined, "is-primary");
   primary.setAttribute("tabindex", "0");
   tip(primary, "所有时间记录之和，并行记录会重复计入，待确认时长核对前仍是估计。");
@@ -140,7 +142,7 @@ export async function renderReview(plugin: LubiPlugin, host: HTMLElement, state:
     const ib = catOrder.indexOf(b);
     return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
   });
-  const chart = host.createDiv({ cls: "lubi-card lubi-chart-card" });
+  const chart = board.createDiv({ cls: "lubi-card lubi-chart-card lubi-review-trend" });
   const chartHead = chart.createDiv({ cls: "lubi-panel-head" });
   el(chartHead, "h3", "lubi-panel-title", state.period === "year" ? "每月记录时长" : "每日记录时长");
   segmented<"chart" | "table">(chartHead, [{ id: "chart", label: "图表" }, { id: "table", label: "表格" }], state.display || "chart", (display) => setState({ display })).addClass("lubi-chart-mode");
@@ -272,7 +274,7 @@ export async function renderReview(plugin: LubiPlugin, host: HTMLElement, state:
   if (isYear) renderHeatmap(plugin, host, from, to, dailyStats, unknownStartDates);
 
   // 分类明细 + 事项 Top
-  const extras = host.createDiv({ cls: "lubi-card lubi-review-extras" });
+  const extras = board.createDiv({ cls: "lubi-card lubi-review-extras" });
   const detail = extras.createEl("details", { cls: "lubi-fold lubi-review-breakdown" });
   detail.createEl("summary", { text: "分类、事项与支出" });
   const grid = detail.createDiv({ cls: "lubi-review-grid" });
