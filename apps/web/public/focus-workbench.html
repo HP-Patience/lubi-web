@@ -11,11 +11,11 @@
     <aside class="rail" aria-label="主导航">
       <div class="brand">Lubi</div>
       <nav class="rail-nav">
-        <button class="rail-link is-active" data-view="today"><span class="rail-icon">◫</span><span>今天</span></button>
-        <button class="rail-link" data-view="plan"><span class="rail-icon">□</span><span>计划</span></button>
-        <button class="rail-link" data-view="review"><span class="rail-icon">◔</span><span>回顾</span></button>
+        <button class="rail-link is-active" data-view="today"><span class="rail-icon icon-today" aria-hidden="true"></span><span>今天</span></button>
+        <button class="rail-link" data-view="plan"><span class="rail-icon icon-plan" aria-hidden="true"></span><span>计划</span></button>
+        <button class="rail-link" data-view="review"><span class="rail-icon icon-review" aria-hidden="true"></span><span>回顾</span></button>
       </nav>
-      <button class="rail-link rail-settings" data-view="settings"><span class="rail-icon">⚙</span><span>设置与备份</span></button>
+      <button class="rail-link rail-settings" data-view="settings"><span class="rail-icon icon-settings" aria-hidden="true"></span><span>设置与备份</span></button>
     </aside>
 
     <main class="workspace">
@@ -27,18 +27,18 @@
           <button class="today-button">今天</button>
         </div>
         <div class="top-actions">
-          <button class="button button-quiet">◷ 记用时</button>
-          <button class="button button-dark">＋ 新建任务</button>
+          <button class="button button-quiet">记录用时</button>
+          <button class="button button-dark">新建任务</button>
         </div>
       </header>
 
       <section class="view view-today is-visible" data-panel="today">
         <div class="view-heading">
           <div>
-            <p class="eyebrow">SATURDAY · 07 NOVEMBER</p>
+            <p class="eyebrow">今天 · 11月7日</p>
             <h1>今日工作台</h1>
           </div>
-          <p class="heading-note">把注意力留给正在进行的事。</p>
+          <p class="heading-note">把注意力留给正在进行的事</p>
         </div>
         <div class="today-layout">
           <section class="task-surface surface">
@@ -59,7 +59,7 @@
               <button class="task-row"><span class="check"></span><span class="task-copy"><strong>整理复习资料</strong><small>16:00–17:00 · 1h</small></span><span class="task-action">开始</span></button>
               <button class="task-row"><span class="check"></span><span class="task-copy"><strong>运动与放松</strong><small>17:10–17:40 · 30min</small></span><span class="task-action">开始</span></button>
             </div>
-            <button class="add-task">＋ 添加今天的任务</button>
+            <button class="add-task">添加今天的任务</button>
           </section>
 
           <aside class="focus-column">
@@ -67,10 +67,10 @@
               <div class="surface-heading"><h2>当前计时</h2><span class="live-dot"></span></div>
               <p class="focus-task">回复导师邮件</p>
               <div class="timer">00:42:18</div>
-              <div class="timer-actions"><button class="button button-quiet">Ⅱ 暂停</button><button class="button button-dark">结束并记入</button></div>
+              <div class="timer-actions"><button class="button button-quiet">暂停</button><button class="button button-dark">结束并记入</button></div>
             </section>
             <section class="records-surface surface">
-              <div class="surface-heading"><h2>我的用时</h2><span class="surface-link">3 条记录 →</span></div>
+              <div class="surface-heading"><h2>我的用时</h2><span class="surface-link">查看 3 条记录</span></div>
               <div class="record-list">
                 <div class="record-row"><span>整理本周笔记</span><strong>1h</strong><small>学习 · 08:30</small></div>
                 <div class="record-row"><span>英语听力</span><strong>40min</strong><small>学习 · 09:40</small></div>
@@ -83,13 +83,13 @@
               <div class="pending-row"><span>期末复习</span><strong>28min</strong><small>11:42–12:10 · 学习</small></div>
               <button class="button button-dark pending-action">核对并保存</button>
             </section>
-            <div class="today-status">◷ 今天已记录 <strong>2h 18min</strong></div>
+            <div class="today-status">今天已记录 <strong>2h 18min</strong></div>
           </aside>
         </div>
       </section>
 
       <section class="view" data-panel="plan">
-        <div class="view-heading"><div><p class="eyebrow">PLAN · WEEK 45</p><h1>周计划</h1></div><div class="segmented"><button class="is-active">日历</button><button>甘特图</button></div></div>
+        <div class="view-heading"><div><p class="eyebrow">计划 · 11月2日–11月8日</p><h1>周计划</h1></div><div class="segmented"><button class="is-active">日历</button><button>甘特图</button></div></div>
         <section class="surface plan-surface">
           <div class="plan-toolbar"><button class="icon-button">‹</button><strong>2026年11月2日 — 11月8日</strong><button class="icon-button">›</button><span class="toolbar-spacer"></span><span class="muted">拖动任务调整安排</span></div>
           <div class="week-grid">
@@ -104,13 +104,13 @@
       </section>
 
       <section class="view" data-panel="review">
-        <div class="view-heading"><div><p class="eyebrow">REVIEW · WEEK 45</p><h1>本周回顾</h1></div><div class="date-range">‹　11月2日 — 11月8日　›</div></div>
+        <div class="view-heading"><div><p class="eyebrow">回顾 · 11月2日–11月8日</p><h1>本周回顾</h1></div><div class="date-range">‹　11月2日 — 11月8日　›</div></div>
         <div class="review-layout"><section class="surface review-main"><div class="review-total"><span>已记录</span><strong>11h 24min</strong><small>记录不完整不代表效率下降。</small></div><div class="chart-title"><h2>每天的投入</h2><span class="muted">按实际记录统计</span></div><div class="chart"><div class="chart-grid"><i></i><i></i><i></i><i></i></div><svg viewBox="0 0 720 180" role="img" aria-label="本周用时趋势"><polyline points="20,125 135,92 250,108 365,76 480,62 595,88 700,42" fill="none" stroke="#c9963e" stroke-width="3"/><g fill="#c9963e"><circle cx="20" cy="125" r="5"/><circle cx="135" cy="92" r="5"/><circle cx="250" cy="108" r="5"/><circle cx="365" cy="76" r="5"/><circle cx="480" cy="62" r="5"/><circle cx="595" cy="88" r="5"/><circle cx="700" cy="42" r="5"/></g></svg><div class="chart-days"><span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span></div></div></section><aside class="review-side"><section class="surface"><div class="surface-heading"><h2>下周行动</h2><span class="muted">3 项</span></div><div class="action-row"><span class="check"></span>继续推进期末复习</div><div class="action-row"><span class="check"></span>完成汇报初稿</div><div class="action-row"><span class="check"></span>整理本周笔记</div></section><section class="surface"><div class="surface-heading"><h2>分类投入</h2></div><div class="category-row"><span>学习</span><strong>7h 36min</strong><span class="bar"><i style="width:66%"></i></span></div><div class="category-row"><span>日常</span><strong>2h 48min</strong><span class="bar"><i style="width:24%"></i></span></div><div class="category-row"><span>其他</span><strong>1h</strong><span class="bar"><i style="width:9%"></i></span></div></section></aside></div>
       </section>
 
       <section class="view" data-panel="settings">
-        <div class="view-heading"><div><p class="eyebrow">WORKSPACE · LOCAL DATA</p><h1>设置与备份</h1></div></div>
-        <div class="settings-layout"><section class="surface settings-list"><h2>通用设置</h2><div class="setting-row"><div><strong>主题</strong><small>选择工作区的显示方式</small></div><span>浅色　›</span></div><div class="setting-row"><div><strong>一天开始时间</strong><small>用于计划视图的时间轴</small></div><span>06:00　›</span></div><div class="setting-row"><div><strong>计时结束提醒</strong><small>结束计时前提醒确认实际用时</small></div><span class="toggle is-on"></span></div></section><section class="surface settings-list"><h2>数据文件</h2><div class="file-status"><span class="status-dot"></span><div><strong>Lubi_data.json</strong><small>最后保存于 2026-11-07 12:24 · 356 KB</small></div><span class="muted">数据正常</span></div><button class="setting-action">↓ 导出数据 JSON</button><button class="setting-action">↻ 恢复业务数据</button></section></div>
+        <div class="view-heading"><div><p class="eyebrow">工作区 · 本地数据</p><h1>设置与备份</h1></div></div>
+        <div class="settings-layout"><section class="surface settings-list"><h2>通用设置</h2><div class="setting-row"><div><strong>主题</strong><small>选择工作区的显示方式</small></div><span>浅色　›</span></div><div class="setting-row"><div><strong>一天开始时间</strong><small>用于计划视图的时间轴</small></div><span>06:00　›</span></div><div class="setting-row"><div><strong>计时结束提醒</strong><small>结束计时前提醒确认实际用时</small></div><span class="toggle is-on"></span></div></section><section class="surface settings-list"><h2>数据文件</h2><div class="file-status"><span class="status-dot"></span><div><strong>Lubi_data.json</strong><small>最后保存于 2026-11-07 12:24 · 356 KB</small></div><span class="muted">数据正常</span></div><button class="setting-action">导出数据 JSON</button><button class="setting-action">恢复业务数据</button></section></div>
       </section>
     </main>
   </div>

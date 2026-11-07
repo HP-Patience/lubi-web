@@ -46,7 +46,7 @@ document.querySelectorAll('.task-row').forEach((row) => {
 document.querySelector('.timer-actions .button-quiet')?.addEventListener('click', (event) => {
   const button = event.currentTarget;
   const paused = button.textContent.includes('暂停');
-  button.textContent = paused ? '▶ 继续' : 'Ⅱ 暂停';
+  button.textContent = paused ? '继续' : '暂停';
   document.querySelector('.live-dot')?.classList.toggle('is-paused', paused);
   showPreviewToast(paused ? '计时已暂停（静态预览）' : '计时已继续（静态预览）');
 });
