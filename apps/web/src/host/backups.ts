@@ -5,7 +5,8 @@ import type { App } from './app';
 
 /** Presentation only: each format retains its original exporter/parser and isolated restore. */
 export function renderBackups(app: App, host: HTMLElement): void {
-  host.createEl('p', { cls: 'web-host-note', text: '先按用途选择格式。三种备份不能互换；网页恢复只新建隔离副本，不覆盖当前任务、日记或在线数据库。这里的数据独立于原 Obsidian Vault。' });
+  host.addClass('web-backup-center');
+  host.createEl('p', { cls: 'web-host-note web-backup-intro', text: '先按用途选择格式。三种备份不能互换；网页恢复只新建隔离副本，不覆盖当前任务、日记或在线数据库。这里的数据独立于原 Obsidian Vault。' });
   const card = (name: string, tag: string, contents: string, omissions: string, restore: string) => {
     const section = host.createEl('section', { cls: 'web-backup-card', attr: { 'aria-label': name } });
     const head = section.createDiv({ cls: 'web-backup-heading' });

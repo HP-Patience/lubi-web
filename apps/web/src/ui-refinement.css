@@ -283,6 +283,41 @@
 .lubi-root .lubi-review .lubi-data-warning { margin-bottom:14px; }
 .lubi-root .lubi-review .lubi-heat-card { margin-top:16px; }
 
+/* 设置与备份：分组清楚，危险动作与常规设置视觉分离 */
+.web-settings-modal.web-settings-focused { width:min(880px,calc(100vw - 32px)); }
+.web-settings-focused .web-settings-head { margin-bottom:14px; }
+.web-settings-focused .web-settings-title {
+  margin:0; font-family:Georgia,"Songti SC",serif; font-size:24px; font-weight:600; letter-spacing:-.02em;
+}
+.web-settings-focused .web-settings-subtitle { margin:6px 0 0; color:var(--text-muted); font-size:12px; line-height:1.7; }
+.web-settings-focused .web-settings-nav { border-bottom:1px solid var(--background-modifier-border); padding-bottom:10px; margin-bottom:16px; }
+.web-settings-focused .web-settings-nav button { border-radius:6px; }
+.web-settings-focused .web-settings-nav button[aria-selected=true] {
+  background:#f2e9d6; border-color:#ecdfc6; color:#20242a; font-weight:600;
+}
+.web-settings-focused .web-settings-body { min-height:0; }
+.web-settings-focused .lubi-settings { font-size:13px; }
+.web-settings-focused .lubi-settings-section {
+  border:1px solid var(--background-modifier-border); border-radius:8px; padding:14px 16px; margin-bottom:12px; background:var(--background-primary);
+}
+.web-settings-focused .lubi-settings-section > h3 { margin:0 0 10px; font-size:14px; }
+.web-settings-focused .setting-item { padding:11px 0; }
+.web-settings-focused .setting-item-name { font-size:13px; }
+.web-settings-focused .setting-item-description { font-size:11px; line-height:1.6; }
+.web-settings-focused .web-settings-actions { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 16px; }
+.web-settings-focused .web-settings-actions button { min-height:32px; padding:5px 11px; font-size:12px; border-radius:6px; }
+.web-settings-focused .web-backup-center { display:grid; gap:12px; }
+.web-settings-focused .web-backup-intro { margin:0; }
+.web-settings-focused .web-backup-card {
+  border:1px solid var(--background-modifier-border); border-radius:8px; padding:16px 18px; margin:0; background:var(--background-primary);
+}
+.web-settings-focused .web-backup-card h3 { font-size:14px; }
+.web-settings-focused .web-backup-format { background:#f1efe9; border-radius:4px; padding:2px 6px; font-size:10px; }
+.web-settings-focused .web-backup-card p { font-size:12px; line-height:1.7; }
+.web-settings-focused .web-backup-actions { gap:8px; margin-top:12px; }
+.web-settings-focused .web-backup-actions button { min-height:32px; padding:6px 12px; border-radius:6px; font-size:12px; }
+.web-settings-focused .web-backup-card:last-of-type { border-left:3px solid #d9c7a2; }
+
 /* Replace competing panels with one calm surface and fine dividers. */
 .lubi-root .lubi-card,
 .lubi-root .lubi-timeline-scroll,

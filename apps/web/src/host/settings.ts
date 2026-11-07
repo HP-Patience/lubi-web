@@ -8,10 +8,14 @@ export function openSettings(app: App, initial = 'lubi') {
   if (!tab) return;
   const modal = new Modal(app);
   modal.setTitle(initial === 'lubi-backups' ? '备份与恢复' : 'Lubi 设置');
-  modal.modalEl.addClass('web-settings-modal');
+  modal.modalEl.addClass('web-settings-modal', 'web-settings-focused');
+  const head = modal.contentEl.createDiv({ cls: 'web-settings-head' });
+  head.createEl('h2', { cls: 'web-settings-title', text: '设置与备份' });
+  head.createEl('p', { cls: 'web-settings-subtitle', text: '本地数据、插件设置与备份格式集中在这里；不同备份不能互换。' });
   const nav = modal.contentEl.createDiv({ cls: 'web-settings-nav', attr: { role: 'tablist', 'aria-label': '设置与数据' } });
-  const general = modal.contentEl.createDiv({ cls: 'web-settings-general', attr: { role: 'tabpanel', 'aria-label': '设置' } });
-  const backups = modal.contentEl.createDiv({ cls: 'web-settings-backups', attr: { role: 'tabpanel', 'aria-label': '备份与恢复' } });
+  const body = modal.contentEl.createDiv({ cls: 'web-settings-body' });
+  const general = body.createDiv({ cls: 'web-settings-general', attr: { role: 'tabpanel', 'aria-label': '设置' } });
+  const backups = body.createDiv({ cls: 'web-settings-backups', attr: { role: 'tabpanel', 'aria-label': '备份与恢复' } });
   let initialized = false;
   const buildSettings = () => {
     if (initialized) return; initialized = true;
